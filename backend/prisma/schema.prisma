@@ -16,4 +16,19 @@ model User {
   encryptedPrivateKey String
   authKey             String
   createdAt           DateTime @default(now())
+
+  chatsAsA Chat[] @relation("ChatUserA")
+  chatsAsB Chat[] @relation("ChatUserB")
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  userAId   String
+  userBId   String
+  userA     User     @relation("ChatUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB     User     @relation("ChatUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userAId, userBId])
+  @@index([userBId])
 }
