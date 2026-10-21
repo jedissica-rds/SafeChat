@@ -21,8 +21,7 @@ const messageSelect = {
   hmac: true,
   seq: true,
   sentAt: true,
-  status: true,
-  lastSeq: true,
+  status: true
 } as const;
 
 const rank: Record<MessageStatus, number> = {
