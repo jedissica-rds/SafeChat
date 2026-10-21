@@ -12,7 +12,7 @@ import { UserRegisterDto } from './dto/user-register-dto';
 import { UserLoginDto } from './dto/user-login-dto';
 import { UserResponseDto } from './dto/user-response-dto';
 
-@ApiTags('auth')
+@ApiTags('users')
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}

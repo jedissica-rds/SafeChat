@@ -19,6 +19,9 @@ model User {
 
   chatsAsA Chat[] @relation("ChatUserA")
   chatsAsB Chat[] @relation("ChatUserB")
+
+  messagesSent     Message[] @relation("MessageFrom")
+  messagesReceived Message[] @relation("MessageTo")
 }
 
 model Chat {
@@ -29,6 +32,38 @@ model Chat {
   userB     User     @relation("ChatUserB", fields: [userBId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
+  lastSeq  Int       @default(0)
+  messages Message[]
+
   @@unique([userAId, userBId])
   @@index([userBId])
+}
+
+enum MessageStatus {
+  stored
+  delivered
+  read
+}
+
+model Message {
+  id                    String        @id // UUID gerado no cliente (idempotência)
+  chatId                String
+  fromId                String
+  toId                  String
+  wrappedSessionKeyFrom String        @db.Text
+  wrappedSessionKeyTo   String        @db.Text
+  iv                    String
+  ciphertext            String        @db.Text
+  hmac                  String
+  seq                   Int
+  sentAt                DateTime
+  createdAt             DateTime      @default(now())
+  status                MessageStatus @default(stored)
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  from User @relation("MessageFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   User @relation("MessageTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, seq])
+  @@index([toId, status])
 }
