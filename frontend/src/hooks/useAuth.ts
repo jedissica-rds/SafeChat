@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { login, signup } from "../service/authService";
 import type { AuthMode } from "../types/chat";
@@ -7,6 +5,7 @@ import type { AuthMode } from "../types/chat";
 export function useAuth(onLogin: () => void) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [user, setUser] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +29,7 @@ export function useAuth(onLogin: () => void) {
         await login({ user, password });
         onLogin();
       } else {
-        await signup({ user, password, confirm });
+        await signup({ name, user, password, confirm });
         switchMode("login");
       }
     } catch (err) {
@@ -47,12 +46,14 @@ export function useAuth(onLogin: () => void) {
   return {
     mode,
     user,
+    name,
     password,
     confirm,
     showPassword,
     submitting,
     error,
     setUser,
+    setName,
     setPassword,
     setConfirm,
     setShowPassword,
