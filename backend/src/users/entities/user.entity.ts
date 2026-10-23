@@ -7,14 +7,14 @@ export class User {
   private _name: string;
   private _authKey: string;
   private _publicKey: string;
-  private _encryptedPrivateKey: number;
+  private _encryptedPrivateKey: string;
 
   constructor(
     username: string,
     name: string,
     authKey: string,
     publicKey: string,
-    encryptedPrivateKey: number,
+    encryptedPrivateKey: string,
   ) {
     this._id = randomUUID();
     this._username = username;
@@ -46,7 +46,7 @@ export class User {
     return this._publicKey;
   }
   
-  get encryptedPrivateKey(): number {
+  get encryptedPrivateKey(): string {
     return this._encryptedPrivateKey;
   }
 
@@ -73,7 +73,7 @@ export class User {
     this._publicKey = publicKey;
   }
 
-  set encryptedPrivateKey(encryptedPrivateKey: number) {
+  set encryptedPrivateKey(encryptedPrivateKey: string) {
     this._encryptedPrivateKey = encryptedPrivateKey;
   }
 

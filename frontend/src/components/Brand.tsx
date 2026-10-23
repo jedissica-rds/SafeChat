@@ -15,7 +15,7 @@ export function Brand({ compact = false }: BrandProps) {
       </span>
 
       <div>
-        <strong>Chat Seguro</strong>
+        <strong>Camellia Chat</strong>
 
         {!compact && (
           <span>Suas mensagens, só entre vocês</span>

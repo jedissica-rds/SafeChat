@@ -11,6 +11,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const {
     mode,
     user,
+    name,
     password,
     confirm,
     showPassword,
@@ -19,6 +20,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     setUser,
     setPassword,
     setConfirm,
+    setName,
     setShowPassword,
     switchMode,
     submit,
@@ -58,6 +60,24 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             Criar conta
           </button>
         </div>
+                  {mode === "signup" && (
+            <>
+              <label className="field-label" htmlFor="nome">
+                Nome
+              </label>
+
+              <div className="field">
+                <input
+                  id="nome"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Seu nome"
+                  autoComplete="name"
+                  disabled={submitting}
+                />
+              </div>
+            </>
+          )}
 
         <form onSubmit={submit}>
           <label className="field-label" htmlFor="usuario">

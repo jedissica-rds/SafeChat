@@ -112,11 +112,12 @@ input::placeholder { color: #a8b3ca; }
   font-weight: 700;
 }
 
-.chat-page { height: 100vh; min-height: 560px; padding: 24px; background: #f3f6fd; }
+.chat-page { height: 100vh; height: 100dvh; min-height: 560px; padding: 24px; background: #f3f6fd; }
 .chat-shell {
   height: 100%;
   max-width: 1380px;
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 340px 1fr;
   margin: auto;
   overflow: hidden;
@@ -125,6 +126,8 @@ input::placeholder { color: #a8b3ca; }
   background: white;
   box-shadow: 0 22px 60px rgba(64, 84, 130, .13);
 }
+
+.sidebar, .conversation { min-height: 0; }
 
 .sidebar { min-width: 0; display: flex; flex-direction: column; border-right: 1px solid #e4eaf6; background: #f9fbff; }
 .sidebar-brand { padding: 20px 21px 14px; }

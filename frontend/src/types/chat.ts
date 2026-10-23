@@ -1,10 +1,16 @@
 
 export type Screen = "login" | "chat";
 export type AuthMode = "login" | "signup";
-export type MessageStatus = "sent" | "delivered" | "read" | "failed";
+
+export type MessageStatus =
+  | "sent"
+  | "stored"
+  | "delivered"
+  | "read"
+  | "failed";
 
 export type Contact = {
-  id: number;
+  id: string;
   name: string;
   initials: string;
   color: string;
@@ -13,7 +19,7 @@ export type Contact = {
 };
 
 export type Message = {
-  id: number;
+  id: string;
   text: string;
   mine: boolean;
   time: string;
