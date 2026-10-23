@@ -1,17 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
 
-import type { MessageStatus } from "../types/chat";
-import { contacts, initialMessages } from "../data/mockData";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent } from "react";
 
 import { getSession, getUser } from "../service/authService";
 import { encryptMessage, decryptMessage } from "../service/chatEnconding";
-import {
-  getChats,
-  getMessages,
-
 import {
   getChats,
   getMessages,
@@ -20,7 +12,8 @@ import {
   type Chat,
   type StoredMessage,
 } from "../service/chatService";
-import type { Message } from "../types/chat";
+import type { EncryptedMessageEnvelope } from "../crypto/types";
+import type { Message, MessageStatus } from "../types/chat";
 
 type ChatMessages = Record<string, Message[]>;
 
@@ -33,11 +26,24 @@ type Contact = {
   time: string;
 };
 
+function toMessageStatus(status: string): MessageStatus {
+  switch (status) {
+    case "stored":
+    case "sent":
+      return "sent";
+    case "delivered":
+      return "delivered";
+    case "read":
+      return "read";
+    default:
+      return "sent";
+  }
+}
+
 function formatTime(date?: string): string {
   if (!date) return "";
 
   const parsed = new Date(date);
-
   if (Number.isNaN(parsed.getTime())) return "";
 
   return parsed.toLocaleTimeString("pt-BR", {
@@ -59,7 +65,6 @@ function getErrorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
-// Intervalos da atualização automática.
 const MESSAGE_POLL_MS = 3000;
 const CHAT_POLL_MS = 10000;
 
@@ -74,12 +79,10 @@ function sameChats(a: Chat[], b: Chat[]): boolean {
   return a.length === b.length && a.every((item, i) => item.id === b[i].id);
 }
 
-// Cacheia as chaves públicas dos usuários consultados.
 const publicKeyCache = new Map<string, string>();
 
 async function getPublicKey(username: string): Promise<string> {
   const cached = publicKeyCache.get(username);
-
   if (cached) return cached;
 
   const user = await getUser(username);
@@ -89,49 +92,62 @@ async function getPublicKey(username: string): Promise<string> {
   }
 
   publicKeyCache.set(username, user.publicKey);
-
   return user.publicKey;
 }
 
-// Em conversa 1:1, toda mensagem que não veio do contato é minha.
 async function toDisplayMessage(
   item: StoredMessage,
   contactId: string | undefined,
+  chatId: string,
   textCache: Map<string, string>,
 ): Promise<Message> {
+  const session = getSession();
   const mine = contactId ? item.fromId !== contactId : false;
 
-  // Mensagens já descriptografadas não são processadas de novo a cada consulta.
   let text = textCache.get(item.id);
 
   if (text === undefined) {
     try {
-      const privateKey = getSession()?.privateKey;
-
-      if (!privateKey) {
+      if (!session?.privateKey) {
         throw new Error("Sessão sem chave privada.");
       }
 
+      if (!session.user.id) {
+        throw new Error(
+          "O login não retornou o ID do usuário. Verifique a resposta do backend.",
+        );
+      }
+
+      // O envelope precisa manter os mesmos metadados usados no HMAC.
+      const envelope: EncryptedMessageEnvelope = {
+        id: item.id,
+        chatId: item.chatId || chatId,
+        fromId: item.fromId,
+        toId: item.toId,
+        keyDerivationSalt: item.keyDerivationSalt,
+        wrappedSessionKeyFrom: item.wrappedSessionKeyFrom,
+        wrappedSessionKeyTo: item.wrappedSessionKeyTo,
+        iv: item.iv,
+        ciphertext: item.ciphertext,
+        hmac: item.hmac,
+        sentAt: item.sentAt,
+        seq: item.seq,
+        status: item.status,
+      };
+
+      const wrappedSessionKey = mine
+        ? item.wrappedSessionKeyFrom
+        : item.wrappedSessionKeyTo;
+
       text = await decryptMessage(
-        {
-          ciphertext: item.ciphertext,
-          iv: item.iv,
-          hmac: item.hmac,
-          wrappedSessionKeys: mine
-            ? [
-                item.wrappedSessionKeyFrom,
-                item.wrappedSessionKeyTo,
-              ]
-            : [
-                item.wrappedSessionKeyTo,
-                item.wrappedSessionKeyFrom,
-              ],
-        },
-        privateKey,
+        envelope,
+        wrappedSessionKey,
+        session.privateKey,
       );
 
       textCache.set(item.id, text);
-    } catch {
+    } catch (err) {
+      console.error(`Falha ao descriptografar a mensagem ${item.id}:`, err);
       text = "[Não foi possível descriptografar a mensagem]";
     }
   }
@@ -141,49 +157,39 @@ async function toDisplayMessage(
     text,
     mine,
     time: formatTime(item.sentAt),
-    status: item.status === "stored" ? "sent" : item.status,
+    status: toMessageStatus(item.status),
   };
 }
 
 export function useChat() {
-  // Dados
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessages>({});
 
-  // Permite achar o contato de uma conversa sem recriar callbacks a cada `chats`.
   const chatsRef = useRef<Chat[]>([]);
   chatsRef.current = chats;
 
-  // Textos já descriptografados, por id de mensagem.
   const textCacheRef = useRef(new Map<string, string>());
-
-  // Muda a cada envio, para descartar consultas que ficaram desatualizadas.
   const mutationRef = useRef(0);
 
-  // Campos da interface
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState("");
   const [mobileConversation, setMobileConversation] = useState(false);
 
-  // Estados de carregamento
   const [loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [searchingContact, setSearchingContact] = useState(false);
 
-  // Erros
   const [error, setError] = useState<string | null>(null);
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
 
-  // Carrega as conversas do usuário autenticado.
   const loadChats = useCallback(async () => {
     setLoadingChats(true);
     setError(null);
 
     try {
       const result = await getChats();
-
       setChats(result);
 
       setActiveId((current) =>
@@ -193,10 +199,7 @@ export function useChat() {
       );
     } catch (err) {
       setError(
-        getErrorMessage(
-          err,
-          "Não foi possível carregar as conversas.",
-        ),
+        getErrorMessage(err, "Não foi possível carregar as conversas."),
       );
     } finally {
       setLoadingChats(false);
@@ -207,25 +210,27 @@ export function useChat() {
     void loadChats();
   }, [loadChats]);
 
-  // Busca e descriptografa as mensagens de uma conversa.
   const fetchDisplayMessages = useCallback(
     async (chatId: string): Promise<Message[]> => {
       const result = await getMessages(chatId);
-
       const contactId = chatsRef.current.find(
         (chat) => chat.id === chatId,
       )?.contact.id;
 
       return Promise.all(
         result.map((item) =>
-          toDisplayMessage(item, contactId, textCacheRef.current),
+          toDisplayMessage(
+            item,
+            contactId,
+            chatId,
+            textCacheRef.current,
+          ),
         ),
       );
     },
     [],
   );
 
-  // Permite atualizar manualmente as mensagens.
   const loadConversationMessages = useCallback(
     async (chatId: string) => {
       setLoadingMessages(true);
@@ -240,10 +245,7 @@ export function useChat() {
         }));
       } catch (err) {
         setError(
-          getErrorMessage(
-            err,
-            "Não foi possível carregar as mensagens.",
-          ),
+          getErrorMessage(err, "Não foi possível carregar as mensagens."),
         );
       } finally {
         setLoadingMessages(false);
@@ -252,7 +254,6 @@ export function useChat() {
     [fetchDisplayMessages],
   );
 
-  // Carrega as mensagens quando uma conversa é selecionada.
   useEffect(() => {
     if (!activeId) {
       setLoadingMessages(false);
@@ -278,10 +279,7 @@ export function useChat() {
       } catch (err) {
         if (!cancelled) {
           setError(
-            getErrorMessage(
-              err,
-              "Não foi possível carregar as mensagens.",
-            ),
+            getErrorMessage(err, "Não foi possível carregar as mensagens."),
           );
         }
       } finally {
@@ -296,7 +294,6 @@ export function useChat() {
     };
   }, [activeId, fetchDisplayMessages]);
 
-  // Atualização automática: busca novas mensagens da conversa aberta.
   useEffect(() => {
     if (!activeId) return;
 
@@ -313,7 +310,6 @@ export function useChat() {
       try {
         const displayMessages = await fetchDisplayMessages(chatId);
 
-        // Descarta se saiu da conversa ou se um envio aconteceu no meio.
         if (cancelled || version !== mutationRef.current) return;
 
         setMessages((current) =>
@@ -322,7 +318,7 @@ export function useChat() {
             : { ...current, [chatId]: displayMessages },
         );
       } catch {
-        // Falhas pontuais são ignoradas; a próxima consulta corrige.
+        // Falhas pontuais são recuperadas na próxima consulta.
       } finally {
         running = false;
       }
@@ -339,7 +335,6 @@ export function useChat() {
     };
   }, [activeId, fetchDisplayMessages]);
 
-  // Atualização automática: detecta conversas novas iniciadas por outras pessoas.
   useEffect(() => {
     let running = false;
 
@@ -350,23 +345,24 @@ export function useChat() {
 
       try {
         const result = await getChats();
-
         setChats((current) =>
           sameChats(current, result) ? current : result,
         );
       } catch {
-        // Ignora falhas pontuais.
+        // Falhas pontuais são recuperadas na próxima consulta.
       } finally {
         running = false;
       }
     }
 
-    const timer = setInterval(() => void refreshChats(), CHAT_POLL_MS);
+    const timer = setInterval(
+      () => void refreshChats(),
+      CHAT_POLL_MS,
+    );
 
     return () => clearInterval(timer);
   }, []);
 
-  // Transforma as conversas em contatos para a interface.
   const contacts = useMemo<Contact[]>(
     () =>
       chats.map((chat) => {
@@ -388,7 +384,6 @@ export function useChat() {
   const activeContact =
     contacts.find((contact) => contact.id === activeId) ?? null;
 
-  // Filtra as conversas que já existem.
   const visibleContacts = useMemo(() => {
     const search = query.trim().toLocaleLowerCase("pt-BR");
 
@@ -403,7 +398,6 @@ export function useChat() {
     setSearchMessage(null);
   }, []);
 
-  // Busca um usuário pelo username exato e abre/cria a conversa.
   const searchContact = useCallback(async () => {
     const username = query.trim();
 
@@ -430,13 +424,10 @@ export function useChat() {
         user.username.toLocaleLowerCase() ===
         session.user.username.toLocaleLowerCase()
       ) {
-        setSearchMessage(
-          "Você não pode iniciar uma conversa consigo mesmo.",
-        );
+        setSearchMessage("Você não pode iniciar uma conversa consigo mesmo.");
         return;
       }
 
-      // Se já existe uma conversa, apenas abre.
       const existingChat = chats.find(
         (chat) =>
           chat.contact.username.toLocaleLowerCase() ===
@@ -449,12 +440,8 @@ export function useChat() {
         return;
       }
 
-      // Cria a conversa no backend.
-      const newChat = await createChat({
-        username: user.username,
-      });
+      const newChat = await createChat({ username: user.username });
 
-      // Atualiza a lista local mesmo se a recarga atrasar.
       setChats((current) =>
         current.some((chat) => chat.id === newChat.id)
           ? current
@@ -464,8 +451,6 @@ export function useChat() {
       setActiveId(newChat.id);
       setMobileConversation(true);
       setQuery("");
-
-      // Atualiza os dados vindos do servidor.
       void loadChats();
     } catch (err) {
       setSearchMessage(
@@ -479,13 +464,11 @@ export function useChat() {
     }
   }, [query, chats, selectContact, loadChats]);
 
-  // Envia uma mensagem criptografada.
   const sendMessage = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
       const text = draft.trim();
-
       if (!text || !activeId || sending) return;
 
       const chatId = activeId;
@@ -496,7 +479,6 @@ export function useChat() {
 
       try {
         const session = getSession();
-
         const contact = chats.find(
           (chat) => chat.id === chatId,
         )?.contact;
@@ -509,36 +491,39 @@ export function useChat() {
           throw new Error("Conversa não encontrada.");
         }
 
-        if (!session.user.publicKey) {
+        if (!session.user.id) {
           throw new Error(
-            "A chave pública do usuário não foi encontrada.",
+            "O backend precisa retornar o ID do usuário no login.",
           );
         }
 
-        const recipientPublicKey = await getPublicKey(
-          contact.username,
-        );
+        if (!session.user.publicKey) {
+          throw new Error("A chave pública do usuário não foi encontrada.");
+        }
+
+        const recipientPublicKey = await getPublicKey(contact.username);
 
         const encrypted = await encryptMessage(
           text,
+          {
+            chatId,
+            fromId: session.user.id,
+            toId: contact.id,
+          },
           session.user.publicKey,
           recipientPublicKey,
         );
 
         const saved = await sendMessageToServer({
-          id: crypto.randomUUID(),
+          ...encrypted,
           chatId,
-          wrappedSessionKeyFrom: encrypted.wrappedSessionKeyFrom,
-          wrappedSessionKeyTo: encrypted.wrappedSessionKeyTo,
-          iv: encrypted.iv,
-          ciphertext: encrypted.ciphertext,
-          hmac: encrypted.hmac,
-          sentAt: new Date().toISOString(),
         });
 
+        // Usa a mensagem persistida pelo servidor para validar o envelope.
         const displayMessage = await toDisplayMessage(
           saved,
           contact.id,
+          chatId,
           textCacheRef.current,
         );
 
@@ -554,12 +539,8 @@ export function useChat() {
         setDraft("");
       } catch (err) {
         console.error("Erro ao enviar mensagem:", err);
-
         setError(
-          getErrorMessage(
-            err,
-            "Não foi possível enviar a mensagem.",
-          ),
+          getErrorMessage(err, "Não foi possível enviar a mensagem."),
         );
       } finally {
         setSending(false);

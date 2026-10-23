@@ -1,7 +1,13 @@
-
+// authEnconding.ts
 import { argon2id } from "hash-wasm";
 
 const encoder = new TextEncoder();
+
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.length);
+  copy.set(bytes);
+  return copy.buffer;
+}
 
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -45,18 +51,17 @@ async function hkdf(
 ): Promise<Uint8Array> {
   const base = await crypto.subtle.importKey(
     "raw",
-    master,
+    toArrayBuffer(master),
     "HKDF",
     false,
     ["deriveBits"],
   );
-
   const bits = await crypto.subtle.deriveBits(
     {
       name: "HKDF",
       hash: "SHA-256",
-      salt,
-      info: encoder.encode(info),
+      salt: toArrayBuffer(salt),
+      info: toArrayBuffer(encoder.encode(info)),
     },
     base,
     256,
@@ -99,7 +104,7 @@ export async function deriveKeys(
 
   const encKey = await crypto.subtle.importKey(
     "raw",
-    encBytes,
+    toArrayBuffer(encBytes),
     "AES-GCM",
     false,
     ["encrypt", "decrypt"],
@@ -148,12 +153,12 @@ export async function encryptPrivateKey(
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
   const cipher = new Uint8Array(
-    await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      encKey,
-      pkcs8,
-    ),
-  );
+  await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    encKey,
+    toArrayBuffer(pkcs8),
+  ),
+);
 
   const payload = new Uint8Array(iv.length + cipher.length);
   payload.set(iv, 0);
@@ -177,9 +182,9 @@ export async function decryptPrivateKey(
   const cipher = payload.slice(12);
 
   const pkcs8 = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
     encKey,
-    cipher,
+    toArrayBuffer(cipher),
   );
 
   return crypto.subtle.importKey(

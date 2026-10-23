@@ -1,4 +1,4 @@
-
+// random.ts
 /**
  * Gera bytes aleatórios criptograficamente seguros.
  *

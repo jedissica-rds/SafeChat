@@ -17,6 +17,7 @@ interface ApiResponse<T> {
 }
 
 export interface LoginResponse {
+  id: string;
   name: string;
   username: string;
   salt: string;
@@ -77,8 +78,9 @@ function validateUsername(value: string): string {
   return username;
 }
 
-// GET /api/users/{username}/salt
-export async function getUserSalt(usernameInput: string): Promise<string> {
+export async function getUserSalt(
+  usernameInput: string,
+): Promise<string> {
   const username = validateUsername(usernameInput);
 
   const response = await request<
@@ -102,7 +104,6 @@ export async function getUserSalt(usernameInput: string): Promise<string> {
   return salt;
 }
 
-// POST /api/login
 export async function login({
   user,
   password,
@@ -126,19 +127,29 @@ export async function login({
     throw new Error("O backend não retornou o token de acesso.");
   }
 
+  if (!data.id) {
+    throw new Error(
+      "O backend não retornou o ID do usuário. Atualize a resposta do login.",
+    );
+  }
+
+  if (!data.encryptedPrivateKey || !data.publicKey) {
+    throw new Error(
+      "O backend não retornou as chaves necessárias para a sessão.",
+    );
+  }
+
   const privateKey = await decryptPrivateKey(
     data.encryptedPrivateKey,
     encKey,
   );
 
-  // Armazena o token somente após login e descriptografia bem-sucedidos.
   setAccessToken(data.accessToken);
   session = { user: data, privateKey };
 
   return data;
 }
 
-// POST /api/register
 export async function signup({
   name,
   user,
@@ -180,8 +191,9 @@ export async function signup({
   });
 }
 
-// GET /api/users/{username}
-export async function getUser(usernameInput: string): Promise<User> {
+export async function getUser(
+  usernameInput: string,
+): Promise<User> {
   const username = validateUsername(usernameInput);
 
   const response = await request<ApiResponse<User>>(

@@ -1,6 +1,13 @@
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {
+  @ApiProperty({
+    example: 'cd2798e7-c61b-47ec-9ef3-1053d0f4499e',
+    description: 'Unique user identifier',
+  })
+  id: string;
+
   @ApiProperty({ example: 'John Doe' })
   name: string;
 
@@ -13,7 +20,9 @@ export class UserResponseDto {
   @ApiProperty({ description: 'RSA public key (base64)' })
   publicKey: string;
 
-  @ApiProperty({ description: 'RSA private key encrypted on the client (base64)' })
+  @ApiProperty({
+    description: 'RSA private key encrypted on the client (base64)',
+  })
   encryptedPrivateKey: string;
 
   @ApiProperty({ description: 'JWT access token' })

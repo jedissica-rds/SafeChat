@@ -1,3 +1,4 @@
+
 import {
   ConflictException,
   Injectable,
@@ -13,6 +14,7 @@ import { UserLoginDto } from './dto/user-login-dto';
 function safeEqual(a: string, b: string): boolean {
   const ha = createHash('sha256').update(a).digest();
   const hb = createHash('sha256').update(b).digest();
+
   return timingSafeEqual(ha, hb);
 }
 
@@ -24,32 +26,39 @@ export class UserService {
   ) {}
 
   async register(dto: UserRegisterDto) {
-  try {
-    const user = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        username: dto.username,
-        salt: dto.salt,
-        publicKey: dto.publicKey,
-        encryptedPrivateKey: dto.encryptedPrivateKey,
-        authKey: dto.authKey,
-      },
-      select: { id: true, username: true },
-    });
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          name: dto.name,
+          username: dto.username,
+          salt: dto.salt,
+          publicKey: dto.publicKey,
+          encryptedPrivateKey: dto.encryptedPrivateKey,
+          authKey: dto.authKey,
+        },
+        select: {
+          id: true,
+          username: true,
+        },
+      });
 
-    return {
-      status: 'ok',
-      code: 'USER_CREATED',
-      message: 'User created',
-      data: user,
-    };
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      throw new ConflictException('Username already taken');
+      return {
+        status: 'ok',
+        code: 'USER_CREATED',
+        message: 'User created',
+        data: user,
+      };
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new ConflictException('Username already taken');
+      }
+
+      throw e;
     }
-    throw e;
   }
-}
 
   async getSalt(username: string) {
     const user = await this.prisma.user.findUnique({
@@ -78,7 +87,8 @@ export class UserService {
       where: { username: dto.username },
     });
 
-    const valid = safeEqual(user?.authKey ?? 'dummy', dto.authKey) && !!user;
+    const valid =
+      safeEqual(user?.authKey ?? 'dummy', dto.authKey) && !!user;
 
     if (!user || !valid) {
       throw new UnauthorizedException({
@@ -98,6 +108,7 @@ export class UserService {
       code: 'LOGIN_OK',
       message: 'Authenticated',
       data: {
+        id: user.id,
         name: user.name,
         username: user.username,
         salt: user.salt,

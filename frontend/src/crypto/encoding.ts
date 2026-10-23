@@ -1,4 +1,4 @@
-
+// encoding.ts
 const textEncoder = new TextEncoder();
 
 /**

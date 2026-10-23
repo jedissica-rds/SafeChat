@@ -1,4 +1,3 @@
-
 import { generateRsaKeyPair, unwrapSessionKey } from "./rsa";
 import { wrapSessionKeyForParticipants } from "./rsa";
 import {
@@ -13,6 +12,33 @@ function assert(condition: boolean, message: string): void {
     }
 
     console.log(`[PASSOU] ${message}`);
+}
+
+function alterBase64(value: string): string {
+    if (value.length === 0) {
+        throw new Error("Não é possível alterar um valor Base64 vazio.");
+    }
+
+    const first = value[0];
+    const replacement = first === "A" ? "B" : "A";
+
+    return replacement + value.slice(1);
+}
+
+async function assertRejected(
+    envelope: EncryptedMessageEnvelope,
+    sessionKey: Uint8Array,
+    description: string,
+): Promise<void> {
+    let rejected = false;
+
+    try {
+        await decryptReceivedMessage(envelope, sessionKey);
+    } catch {
+        rejected = true;
+    }
+
+    assert(rejected, description);
 }
 
 async function main(): Promise<void> {
@@ -41,7 +67,6 @@ async function main(): Promise<void> {
 
     console.log("[PASSOU] Envelope criptográfico criado.");
 
-    // Simula os campos que o backend acrescentaria à resposta.
     const envelope: EncryptedMessageEnvelope = {
         ...dto,
         fromId: "alice",
@@ -55,53 +80,57 @@ async function main(): Promise<void> {
         envelope.wrappedSessionKeyTo,
     );
 
-    const recoveredMessage = await decryptReceivedMessage(
-        envelope,
-        bobSessionKey,
-    );
-
-    assert(
-        recoveredMessage === originalMessage,
-        "Bob recupera a mensagem original",
-    );
-
-    // Testa se a alteração do texto cifrado é detectada.
-    const tamperedEnvelope: EncryptedMessageEnvelope = {
-        ...envelope,
-        ciphertext: `${envelope.ciphertext.slice(0, -4)}AAAA`,
-    };
-
-    let tamperingRejected = false;
-
-    try {
-        await decryptReceivedMessage(tamperedEnvelope, bobSessionKey);
-    } catch {
-        tamperingRejected = true;
-    }
-
-    assert(
-        tamperingRejected,
-        "Mensagem adulterada é rejeitada antes da descriptografia",
-    );
-
-    // Testa também a recuperação da chave pelo remetente.
     const aliceSessionKey = await unwrapSessionKey(
         alice.privateKeyPkcs8,
         envelope.wrappedSessionKeyFrom,
     );
 
-    const aliceRecoveredMessage = await decryptReceivedMessage(
-        envelope,
-        aliceSessionKey,
-    );
+    try {
+        const recoveredMessage = await decryptReceivedMessage(
+            envelope,
+            bobSessionKey,
+        );
 
-    assert(
-        aliceRecoveredMessage === originalMessage,
-        "Alice recupera a própria mensagem",
-    );
+        assert(
+            recoveredMessage === originalMessage,
+            "Bob recupera a mensagem original",
+        );
 
-    bobSessionKey.fill(0);
-    aliceSessionKey.fill(0);
+        const tamperedCiphertext: EncryptedMessageEnvelope = {
+            ...envelope,
+            ciphertext: alterBase64(envelope.ciphertext),
+        };
+
+        await assertRejected(
+            tamperedCiphertext,
+            bobSessionKey,
+            "Ciphertext adulterado é rejeitado",
+        );
+
+        const tamperedHmac: EncryptedMessageEnvelope = {
+            ...envelope,
+            hmac: alterBase64(envelope.hmac),
+        };
+
+        await assertRejected(
+            tamperedHmac,
+            bobSessionKey,
+            "HMAC adulterado é rejeitado",
+        );
+
+        const aliceRecoveredMessage = await decryptReceivedMessage(
+            envelope,
+            aliceSessionKey,
+        );
+
+        assert(
+            aliceRecoveredMessage === originalMessage,
+            "Alice recupera a própria mensagem",
+        );
+    } finally {
+        bobSessionKey.fill(0);
+        aliceSessionKey.fill(0);
+    }
 
     console.log("Todos os testes integrados passaram.");
 }

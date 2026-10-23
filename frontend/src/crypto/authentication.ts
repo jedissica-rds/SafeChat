@@ -1,4 +1,4 @@
-
+// authentication.ts
 import { bytesToBase64, utf8ToBytes } from "./encoding";
 
 const KEY_LENGTH = 32;

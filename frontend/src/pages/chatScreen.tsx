@@ -36,7 +36,7 @@ export default function ChatScreen({ onLogout }: ChatScreenProps) {
     sending,
     searchingContact,
     searchMessage,
-  } = useChat(currentUser?.username);
+  } = useChat();
 
   const messageEndRef = useRef<HTMLDivElement>(null);
 
