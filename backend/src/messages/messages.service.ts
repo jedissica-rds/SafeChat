@@ -1,3 +1,5 @@
+// messages.service.ts
+
 import {
   ConflictException,
   Injectable,
@@ -17,6 +19,7 @@ const messageSelect = {
   wrappedSessionKeyFrom: true,
   wrappedSessionKeyTo: true,
   iv: true,
+  keyDerivationSalt: true,
   ciphertext: true,
   hmac: true,
   seq: true,
@@ -92,6 +95,7 @@ export class MessagesService {
             wrappedSessionKeyFrom: dto.wrappedSessionKeyFrom,
             wrappedSessionKeyTo: dto.wrappedSessionKeyTo,
             iv: dto.iv,
+            keyDerivationSalt: dto.keyDerivationSalt,
             ciphertext: dto.ciphertext,
             hmac: dto.hmac,
             seq: lastSeq,

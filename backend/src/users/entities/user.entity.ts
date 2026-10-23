@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { get } from 'firebase/database';
 
 export class User {
 

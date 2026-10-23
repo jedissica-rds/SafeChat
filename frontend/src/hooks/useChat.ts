@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import type { Message, MessageStatus } from "../types/chat";
+import type { MessageStatus } from "../types/chat";
 import { contacts, initialMessages } from "../data/mockData";
 import {
   createMessage,

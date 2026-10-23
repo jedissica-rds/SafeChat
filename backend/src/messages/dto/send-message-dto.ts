@@ -1,3 +1,5 @@
+// send-message-dto.ts
+
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBase64,
@@ -5,6 +7,8 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  Length,
+  Matches,
 } from 'class-validator';
 
 export class SendMessageDto {
@@ -31,8 +35,20 @@ export class SendMessageDto {
   @ApiProperty({ description: 'IV ', example: 'QUJDREVGRw==' })
   @IsString()
   @IsBase64()
-  @MaxLength(64)
+  @Length(24, 24)
+  @Matches(/^[A-Za-z0-9+/]{22}==$/)
   iv: string;
+
+  
+  @ApiProperty({
+    description: 'Salt HKDF de 32 bytes codificado em Base64',
+  })
+  @IsString()
+  @IsBase64()
+  @Length(44, 44)
+  @Matches(/^[A-Za-z0-9+/]{43}=$/)
+  keyDerivationSalt: string;
+
 
   @ApiProperty({ description: 'Mensagem cifrada', example: 'QUJDREVGRw==' })
   @IsString()
@@ -43,7 +59,8 @@ export class SendMessageDto {
   @ApiProperty({ description: 'HMAC', example: 'QUJDREVGRw==' })
   @IsString()
   @IsBase64()
-  @MaxLength(128)
+  @Length(44, 44)
+  @Matches(/^[A-Za-z0-9+/]{43}=$/)
   hmac: string;
 
   @ApiProperty({ description: 'Horário', example: '2026-10-20T22:30:00.000Z' })

@@ -1,0 +1,5251 @@
+diff --git a/node_modules/openssl-browser/openssl.js b/node_modules/openssl-browser/openssl.js
+index 2961f4e..6d2f142 100644
+--- a/node_modules/openssl-browser/openssl.js
++++ b/node_modules/openssl-browser/openssl.js
+@@ -10,273 +10,273 @@ openssl.js
+ */
+ 
+ 
+-globalThis.opensslmod   = opensslmod;
++globalThis.opensslmod = opensslmod;
+ 
+-if(typeof module!='undefined'){
+-      if(module.exports){
+-            module.exports    = opensslmod;
++if (typeof module != 'undefined') {
++      if (module.exports) {
++            module.exports = opensslmod;
+       }
+ }
+ 
+ 
+ 
+-opensslmod.wasmJs           = null;
++opensslmod.wasmJs = null;
+ 
+-opensslmod.fs               = null;
+-opensslmod.path             = null;
+-opensslmod.__filename       = null;
+-opensslmod.__dirname        = null;
++opensslmod.fs = null;
++opensslmod.path = null;
++opensslmod.__filename = null;
++opensslmod.__dirname = null;
+ 
+-opensslmod.config           = {};
++opensslmod.config = {};
+ 
+ 
+ 
+ 
+-function opensslmod(params={}){
++function opensslmod(params = {}) {
+ 
+-  var obj   = {};
++      var obj = {};
+ 
+ 
+-        var df=obj.df=true,did='openssl';
++      var df = obj.df = true, did = 'openssl';
+ 
+-        var platform            = typeof document=='undefined' ? 'node' : 'browser';
++      var platform = typeof document == 'undefined' ? 'node' : 'browser';
+ 
+-        var wasmJs;
++      var wasmJs;
+ 
+-        var wasmBinary;
+-        var wasmBinaryFile;
++      var wasmBinary;
++      var wasmBinaryFile;
+ 
+-        var EmscrJSR_openssl;
+-        var std;
+-        var stdout;
+-        var stderr;
++      var EmscrJSR_openssl;
++      var std;
++      var stdout;
++      var stderr;
+ 
+-        var echo                = true;
++      var echo = true;
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        initmod(params);
++      initmod(params);
+ 
+-        obj.initmod   = initmod
++      obj.initmod = initmod
+ 
+-        function initmod(params){
++      function initmod(params) {
+ 
+-              ('std' in params) && (std=true);
+-              ('stdout' in params) && (stdout=params.stdout);
+-              ('stderr' in params) && (stderr=params.stderr);
++            ('std' in params) && (std = true);
++            ('stdout' in params) && (stdout = params.stdout);
++            ('stderr' in params) && (stderr = params.stderr);
+ 
+-              ('EmscrJSR_openssl' in params) && (EmscrJSR_openssl=params.EmscrJSR_openssl);
+-              ('wasmJs' in params) && (wasmJs=params.wasmJs);
+-              ('wasmBinary' in params) && (wasmBinary=params.wasmBinary);
+-              ('wasmBinaryFile' in params) && (wasmBinaryFile=params.wasmBinaryFile);
++            ('EmscrJSR_openssl' in params) && (EmscrJSR_openssl = params.EmscrJSR_openssl);
++            ('wasmJs' in params) && (wasmJs = params.wasmJs);
++            ('wasmBinary' in params) && (wasmBinary = params.wasmBinary);
++            ('wasmBinaryFile' in params) && (wasmBinaryFile = params.wasmBinaryFile);
+ 
+-              ('echo' in params) && (echo=params.echo);
+-              ('df' in params) && (df=params.df);
++            ('echo' in params) && (echo = params.echo);
++            ('df' in params) && (df = params.df);
+ 
+-        }//initmod
++      }//initmod
+ 
+ 
+-  //:
+-                                                                                (df||obj.df) && console.log('openssl-browser [ ext.code.com ]');
+-                                                                                (df||obj.df) && console.log('OpenSSL 3.5.2 5 Aug 2025 (Library: OpenSSL 3.5.2 5 Aug 2025)');
+-        if(std){
+-              if(typeof stdout!='function'){
+-                    stdout    = true;
+-              }
+-              if(typeof stderr!='function'){
+-                    stderr    = true;
+-              }
+-        }
+-        if(typeof stdout!='function' && stdout){
+-              stdout    = console.log.bind(console,'[ stdout ]');
+-        }
+-        if(typeof stderr!='function' && stderr){
+-              stderr    = console.log.bind(console,'[ stderr ]');
+-        }
++      //:
++      (df || obj.df) && console.log('openssl-browser [ ext.code.com ]');
++      (df || obj.df) && console.log('OpenSSL 3.5.2 5 Aug 2025 (Library: OpenSSL 3.5.2 5 Aug 2025)');
++      if (std) {
++            if (typeof stdout != 'function') {
++                  stdout = true;
++            }
++            if (typeof stderr != 'function') {
++                  stderr = true;
++            }
++      }
++      if (typeof stdout != 'function' && stdout) {
++            stdout = console.log.bind(console, '[ stdout ]');
++      }
++      if (typeof stderr != 'function' && stderr) {
++            stderr = console.log.bind(console, '[ stderr ]');
++      }
+ 
+-        var crypto        = globalThis.crypto||require('crypto').webcrypto;
++      var crypto = globalThis.crypto || require('crypto').webcrypto;
+ 
+ 
+ 
+-        var def           = {};
+-        def.wasmJs        = opensslmod.wasmJs||'https://javascript-2020.github.io/libs/js/external/openssl/openssl.wasm.js';
++      var def = {};
++      def.wasmJs = opensslmod.wasmJs || 'https://javascript-2020.github.io/libs/js/external/openssl/openssl.wasm.js';
+ 
+ 
+-        var cur;
+-        var initial;
+-        var snapshot;
++      var cur;
++      var initial;
++      var snapshot;
+ 
+ 
+-        var fs            = {};
+-        obj.fs            = fs;
++      var fs = {};
++      obj.fs = fs;
+ 
+ 
+-        var libs          = {};
++      var libs = {};
+ 
+ 
+-        var textencoder   = new TextEncoder();
+-        var textdecoder   = new TextDecoder();
++      var textencoder = new TextEncoder();
++      var textdecoder = new TextDecoder();
+ 
+-        obj.text          = {};
+-        obj.log           = {};
++      obj.text = {};
++      obj.log = {};
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.init    = init;
++      obj.init = init;
+ 
+-        async function init({}={}){
+-                                                                                debug.log('init');
+-              var {error}   = await libs[platform]();
+-              if(error){
+-                                                                                debug.log('error',error);
+-                    return {error};
+-              }
++      async function init({ } = {}) {
++            debug.log('init');
++            var { error } = await libs[platform]();
++            if (error) {
++                  debug.log('error', error);
++                  return { error };
++            }
+ 
+-              if(cur){
+-                    fs.save();
+-              }
++            if (cur) {
++                  fs.save();
++            }
+ 
+-              var Module    = {print,printErr,onRuntimeInitialized,wasmJs,wasmBinary,wasmBinaryFile};
+-              cur           = Module;
++            var Module = { print, printErr, onRuntimeInitialized, wasmJs, wasmBinary, wasmBinaryFile };
++            cur = Module;
+ 
+-              await EmscrJSR_openssl(Module);
++            await EmscrJSR_openssl(Module);
+ 
+-              obj.FS        = Module.FS;
+-                                                                                debug.log('init.complete');
+-              return {Module};
++            obj.FS = Module.FS;
++            debug.log('init.complete');
++            return { Module };
+ 
+ 
+-              function print(txt){
++            function print(txt) {
+ 
+-                    if(echo){
+-                                                                                console.log('[ stdout ]',txt);
+-                    }
++                  if (echo) {
++                        console.log('[ stdout ]', txt);
++                  }
+ 
+-                    if(typeof stdout=='function'){
+-                          stdout(txt);
+-                    }
++                  if (typeof stdout == 'function') {
++                        stdout(txt);
++                  }
+ 
+-              }//print
++            }//print
+ 
+ 
+-              function printErr(txt){
++            function printErr(txt) {
+ 
+-                    if(echo){
+-                                                                                console.log('[ stderr ]',txt);
+-                    }
++                  if (echo) {
++                        console.log('[ stderr ]', txt);
++                  }
+ 
+-                    if(typeof stderr=='function'){
+-                          stderr(txt);
+-                    }
++                  if (typeof stderr == 'function') {
++                        stderr(txt);
++                  }
+ 
+-              }//printErr
++            }//printErr
+ 
+ 
+-              function onRuntimeInitialized(){
+-                                                                                debug.log('OpenSSL ready');
+-                                                                                //debug.log(Module);
+-                      if(!initial){
+-                                                                                debug.log('initial');
+-                            initial   = fs.snapshot({Module});
+-                      }
++            function onRuntimeInitialized() {
++                  debug.log('OpenSSL ready');
++                  //debug.log(Module);
++                  if (!initial) {
++                        debug.log('initial');
++                        initial = fs.snapshot({ Module });
++                  }
+ 
+-                      if(snapshot){
+-                                                                                debug.log('snapshot');
+-                            fs.restore({Module,snapshot});
+-                      }
++                  if (snapshot) {
++                        debug.log('snapshot');
++                        fs.restore({ Module, snapshot });
++                  }
+ 
+-              }//onRuntimeInitialized
++            }//onRuntimeInitialized
+ 
+-        }//init
++      }//init
+ 
+ 
+-        init.detached   = async function({echo=true,stdout,stderr}={}){//,wasmJs,wasmBinary,wasmBinaryFile}={}){
+-                                                                                debug.log('init.detached');
+-              var {error}   = await libs[platform]();
+-              if(error){
+-                                                                                debug.log('error',error);
+-                    return {error};
+-              }
++      init.detached = async function ({ echo = true, stdout, stderr } = {}) {//,wasmJs,wasmBinary,wasmBinaryFile}={}){
++            debug.log('init.detached');
++            var { error } = await libs[platform]();
++            if (error) {
++                  debug.log('error', error);
++                  return { error };
++            }
+ 
+-              var Module    = {print,printErr,onRuntimeInitialized,wasmJs,wasmBinary,wasmBinaryFile};
++            var Module = { print, printErr, onRuntimeInitialized, wasmJs, wasmBinary, wasmBinaryFile };
+ 
+-              await EmscrJSR_openssl(Module);
++            await EmscrJSR_openssl(Module);
+ 
+-                                                                                debug.log('init.detached.complete');
+-              return {Module};
++            debug.log('init.detached.complete');
++            return { Module };
+ 
+ 
+-              function print(txt){
++            function print(txt) {
+ 
+-                    if(echo){
+-                                                                                console.log('[ stdout ]',txt);
+-                    }
++                  if (echo) {
++                        console.log('[ stdout ]', txt);
++                  }
+ 
+-                    if(typeof stdout=='function'){
+-                          stdout(txt);
+-                    }
++                  if (typeof stdout == 'function') {
++                        stdout(txt);
++                  }
+ 
+-              }//print
++            }//print
+ 
+ 
+-              function printErr(txt){
++            function printErr(txt) {
+ 
+-                    if(echo){
+-                                                                                console.log('[ stderr ]',txt);
+-                    }
++                  if (echo) {
++                        console.log('[ stderr ]', txt);
++                  }
+ 
+-                    if(typeof stderr=='function'){
+-                          stderr(txt);
+-                    }
++                  if (typeof stderr == 'function') {
++                        stderr(txt);
++                  }
+ 
+-              }//printErr
++            }//printErr
+ 
+ 
+-              function onRuntimeInitialized(){
+-                                                                                debug.log('OpenSSL ready');
+-              }//onRuntimeInitialized
++            function onRuntimeInitialized() {
++                  debug.log('OpenSSL ready');
++            }//onRuntimeInitialized
+ 
+ 
+-        }//detached
++      }//detached
+ 
+ 
+-        libs.browser    = async function(){
+-                                                                                debug.log('libs.browser');
++      libs.browser = async function () {
++            debug.log('libs.browser');
+ 
+-              if(EmscrJSR_openssl){
+-                    return {};
+-              }
++            if (EmscrJSR_openssl) {
++                  return {};
++            }
+ 
+-              wasmJs  ||= def.wasmJs;
+-                                                                                debug.log('wasmJs',wasmJs);
+-              var err;
+-              try{
++            wasmJs ||= def.wasmJs;
++            debug.log('wasmJs', wasmJs);
++            var err;
++            try {
+ 
+-                    var res   = await fetch(wasmJs);
++                  var res = await fetch(wasmJs);
+ 
+-              }//try
+-              catch(err2){
++            }//try
++            catch (err2) {
+ 
+-                    err   = err2
++                  err = err2
+ 
+-              }//catch
+-              if(err){
+-                    var error   = err.message;
+-                    return {error};
+-              }
++            }//catch
++            if (err) {
++                  var error = err.message;
++                  return { error };
++            }
+ 
+-              if(!res.ok){
+-                    var error   = 'error';
+-                    return {error};
+-              }
++            if (!res.ok) {
++                  var error = 'error';
++                  return { error };
++            }
+ 
+-              var txt   = await res.text();
++            var txt = await res.text();
+ 
+-              var js    = `
++            var js = `
+                                 (()=>{
+                                 
+                                       ${txt}
+@@ -285,48 +285,48 @@ function opensslmod(params={}){
+                                       
+                                 })();
+                           `;
+-              EmscrJSR_openssl    = eval(js);
+-              
+-              return {};
+-              
+-        }//browser
+-        
+-        
+-        libs.node   = async function(){
+-                                                                                debug.log('libs.node');
+-              if(EmscrJSR_openssl){
+-                    return {};
+-              }
+-              
+-              var fs              = opensslmod.fs||require('node:fs');
+-              var path            = opensslmod.path||require('node:path');
+-              
+-              if(!wasmJs){
+-                    var tmp   = './openssl.wasm.js';
+-                    if(fs.existsSync(tmp)){
+-                          wasmJs    = tmp;
+-                    }
+-              }
+-              
+-              if(!wasmJs){
+-                    var dir   = opensslmod.__dirname||(__dirname+'/');
+-                    tmp       = dir+'openssl.wasm.js';
+-                    if(fs.existsSync(tmp)){
+-                          wasmJs    = tmp;
+-                    }
+-              }
+-              
+-              if(!wasmJs){
+-                    var result    = await libs.browser();
+-                    return result;
+-              }
+-              
+-              var cwd             = process.cwd();
+-              var abs             = path.resolve(cwd,wasmJs);
+-              var dir             = path.dirname(abs);
+-                                                                                console.log(wasmJs);
+-              var txt             = fs.readFileSync(wasmJs,'utf8');
+-              var js              = `
++            EmscrJSR_openssl = eval(js);
++
++            return {};
++
++      }//browser
++
++
++      libs.node = async function () {
++            debug.log('libs.node');
++            if (EmscrJSR_openssl) {
++                  return {};
++            }
++
++            var fs = opensslmod.fs || require('node:fs');
++            var path = opensslmod.path || require('node:path');
++
++            if (!wasmJs) {
++                  var tmp = './openssl.wasm.js';
++                  if (fs.existsSync(tmp)) {
++                        wasmJs = tmp;
++                  }
++            }
++
++            if (!wasmJs) {
++                  var dir = opensslmod.__dirname || (__dirname + '/');
++                  tmp = dir + 'openssl.wasm.js';
++                  if (fs.existsSync(tmp)) {
++                        wasmJs = tmp;
++                  }
++            }
++
++            if (!wasmJs) {
++                  var result = await libs.browser();
++                  return result;
++            }
++
++            var cwd = process.cwd();
++            var abs = path.resolve(cwd, wasmJs);
++            var dir = path.dirname(abs);
++            console.log(wasmJs);
++            var txt = fs.readFileSync(wasmJs, 'utf8');
++            var js = `
+                                           (()=>{
+                                           
+                                                 ${txt}
+@@ -335,2658 +335,2656 @@ function opensslmod(params={}){
+                                                 
+                                           })();
+                                     `;
+-              EmscrJSR_openssl    = eval(js);
++            EmscrJSR_openssl = eval(js);
+ 
+-              wasmBinaryFile    ||= path.resolve(dir,'openssl.wasm');
+-                                                                                console.log(wasmBinaryFile);
+-              wasmBinary          = fs.readFileSync(wasmBinaryFile);
++            wasmBinaryFile ||= path.resolve(dir, 'openssl.wasm');
++            console.log(wasmBinaryFile);
++            wasmBinary = fs.readFileSync(wasmBinaryFile);
+ 
+-              return {};
++            return {};
+ 
+-        }//node
++      }//node
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.new   = function(){
++      obj.new = function () {
+ 
+-              var fnstr     = opensslmod.toString();
+-              var js        = `(${fnstr})`;
+-              var mod       = eval(js);
+-              mod.config    = opensslmod.config;
+-              mod.md5       = opensslmod.md5;
+-              return mod;
++            var fnstr = opensslmod.toString();
++            var js = `(${fnstr})`;
++            var mod = eval(js);
++            mod.config = opensslmod.config;
++            mod.md5 = opensslmod.md5;
++            return mod;
+ 
+-        }//new
++      }//new
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.run   = run
++      obj.run = run
+ 
+-        async function run(...args){
+-                                                                                debug.log('run',args);
+-              var n   = args.length;
+-              for(var i=0;i<n;i++){
++      async function run(...args) {
++            var n = args.length;
++            for (var i = 0; i < n; i++) {
+ 
+-                    var cmdline   = args[i];
+-                    if(!cmdline)continue;
++                  var cmdline = args[i];
++                  if (!cmdline) continue;
+ 
+-                    var cmd       = cmdline.split(' ');
++                  var cmd = cmdline.split(' ');
+ 
+-                    if(cmd[0]==='openssl'){
+-                          cmd.shift();
+-                    }
++                  if (cmd[0] === 'openssl') {
++                        cmd.shift();
++                  }
+ 
+-                    var {Module,error}    = await init();
+-                    if(error){
+-                          return {error};
+-                    }
++                  var { Module, error } = await init();
++                  if (error) {
++                        return { error };
++                  }
+ 
+ 
+-                    var err;
+-                    try{
++                  var err;
++                  try {
+ 
+-                          var code    = Module.callMain(cmd);
++                        var code = Module.callMain(cmd);
+ 
+-                    }//try
+-                    catch(err2){
++                  }//try
++                  catch (err2) {
+ 
+-                          err   = err2;
++                        err = err2;
+ 
+-                    }//catch
+-                    if(err){
+-                          var error   = err.message;
+-                          return {error,code};
+-                    }
++                  }//catch
++                  if (err) {
++                        var error = err.message;
++                        return { error, code };
++                  }
+ 
+-                    snapshot    = fs.snapshot({Module});
++                  snapshot = fs.snapshot({ Module });
+ 
+-              }//for
++            }//for
+ 
+-              return {Module,code};
++            return { Module, code };
+ 
+-        }//run
++      }//run
+ 
+ 
+-        obj.run.detached    = run_detached;
++      obj.run.detached = run_detached;
+ 
+-        async function run_detached(args,{snapshot,echo,stdout,stderr}={}){
+-                                                                                debug.log('run_detached');
+-              var type    = datatype(arguments[0]);
+-              if(type=='array'){
++      async function run_detached(args, { snapshot, echo, stdout, stderr } = {}) {
++            debug.log('run_detached');
++            var type = datatype(arguments[0]);
++            if (type == 'array') {
+ 
+-                    args                              = arguments[0];
+-                    ({snapshot,echo,stdout,stderr}    = arguments[1]);
+-              }else{
+-                    args                              = [...arguments];
+-                    snapshot                          = undefined;
+-                    echo                              = undefined;
+-                    stdout                            = undefined;
+-                    stderr                            = undefined;
+-              }
++                  args = arguments[0];
++                  ({ snapshot, echo, stdout, stderr } = arguments[1]);
++            } else {
++                  args = [...arguments];
++                  snapshot = undefined;
++                  echo = undefined;
++                  stdout = undefined;
++                  stderr = undefined;
++            }
+ 
+-              var n   = args.length;
+-              for(var i=0;i<n;i++){
++            var n = args.length;
++            for (var i = 0; i < n; i++) {
+ 
+-                    var cmdline   = args[i];
+-                    if(!cmdline)continue;
+-                                                                                debug.log(i,cmdline);
+-                    var cmd       = cmdline.split(' ');
++                  var cmdline = args[i];
++                  if (!cmdline) continue;
++                  debug.log(i, cmdline);
++                  var cmd = cmdline.split(' ');
+ 
+-                    if(cmd[0]==='openssl'){
+-                          cmd.shift();
+-                    }
++                  if (cmd[0] === 'openssl') {
++                        cmd.shift();
++                  }
+ 
+ 
+-                    var {Module,error}    = await init.detached({echo,stdout,stderr});
+-                    if(error){
+-                                                                                debug.log('init.detached error',error);
+-                          return {error};
+-                    }
++                  var { Module, error } = await init.detached({ echo, stdout, stderr });
++                  if (error) {
++                        debug.log('init.detached error', error);
++                        return { error };
++                  }
+ 
+-                    if(snapshot){
+-                          fs.restore({Module,snapshot});
+-                    }
++                  if (snapshot) {
++                        fs.restore({ Module, snapshot });
++                  }
+ 
+-                    var err;
+-                    try{
++                  var err;
++                  try {
+ 
+-                          var code    = Module.callMain(cmd);
+-                                                                                debug.log('code',code);
+-                    }//try
+-                    catch(err2){
++                        var code = Module.callMain(cmd);
++                        debug.log('code', code);
++                  }//try
++                  catch (err2) {
+ 
+-                          err   = err2;
++                        err = err2;
+ 
+-                    }//catch
+-                    if(err){
+-                                                                                debug.log('Module.callMain',err);
+-                          var error   = err.message;
+-                          return {error,code};
+-                    }
++                  }//catch
++                  if (err) {
++                        debug.log('Module.callMain', err);
++                        var error = err.message;
++                        return { error, code };
++                  }
+ 
+ 
+-                    snapshot    = fs.snapshot({Module});
++                  snapshot = fs.snapshot({ Module });
+ 
+-              }//for
+-                                                                                debug.log('ok');
+-              return {Module,code};
++            }//for
++            debug.log('ok');
++            return { Module, code };
+ 
+-        }//detached
++      }//detached
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        var algs    = ['sha1','sha256','sha512','md5','blake2b512','blake2s256','sha3-256','sha3-512'];
+-        algs.forEach(alg=>{
++      var algs = ['sha1', 'sha256', 'sha512', 'md5', 'blake2b512', 'blake2s256', 'sha3-256', 'sha3-512'];
++      algs.forEach(alg => {
+ 
+-              obj[alg]    = async function(value,{src='digest.txt',dest='tmp.bin'}={}){
++            obj[alg] = async function (value, { src = 'digest.txt', dest = 'tmp.bin' } = {}) {
+ 
+-                    var {digest,error}    = await calc_digest(alg,value,{src,dest});
+-                    return {digest,hash:digest,error};
++                  var { digest, error } = await calc_digest(alg, value, { src, dest });
++                  return { digest, hash: digest, error };
+ 
+-              }//alg
++            }//alg
+ 
+-        });
++      });
+ 
+ 
+-        async function calc_digest(alg,value,{src='digest.txt',dest='tmp.bin'}={}){
++      async function calc_digest(alg, value, { src = 'digest.txt', dest = 'tmp.bin' } = {}) {
+ 
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
+ 
+-              var {error}   = await writefile(src,value);
+-              if(error){
+-                    return {error};
+-              }
++            var { error } = await writefile(src, value);
++            if (error) {
++                  return { error };
++            }
+ 
+-              var {Module,code,error}    = await run(
+-                    `openssl ${alg} -out ${dest} ${src}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
++            var { Module, code, error } = await run(
++                  `openssl ${alg} -out ${dest} ${src}`
++            );
++            if (error) {
++                  return { error };
++            }
+ 
+-              var {txt,error}    = readfile.txt(dest);
+-              if(error){
+-                    return {error};
+-              }
+-              console.log('txt',txt);
+-              var i         = txt.indexOf('=');
+-              var digest    = txt.slice(i+2);
+-              return {digest};
++            var { txt, error } = readfile.txt(dest);
++            if (error) {
++                  return { error };
++            }
++            console.log('txt', txt);
++            var i = txt.indexOf('=');
++            var digest = txt.slice(i + 2);
++            return { digest };
+ 
+-        }//digest
++      }//digest
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.keypair             = generate_key_pair;
+-        obj.generateKeyPair     = generate_key_pair;
+-        obj.generate_key_pair   = generate_key_pair;
++      obj.keypair = generate_key_pair;
++      obj.generateKeyPair = generate_key_pair;
++      obj.generate_key_pair = generate_key_pair;
+ 
+-        async function generate_key_pair({
+-              keybits=4096,
+-              key_name='private.key',pub_name='public.key'
+-        }={}){
++      async function generate_key_pair({
++            keybits = 4096,
++            key_name = 'private.key', pub_name = 'public.key'
++      } = {}) {
+ 
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
+ 
+-              var {error}    = await run(
+-                    `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:${keybits} -out ${key_name}`,
+-                    `openssl pkey -in ${key_name} -pubout -out ${pub_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
++            var { error } = await run(
++                  `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:${keybits} -out ${key_name}`,
++                  `openssl pkey -in ${key_name} -pubout -out ${pub_name}`
++            );
++            if (error) {
++                  return { error };
++            }
+ 
+-              var {txt,error}    = readfile.txt(key_name);
+-              if(error){
+-                    return {error};
+-              }
+-              var privateKey      = txt;
++            var { txt, error } = readfile.txt(key_name);
++            if (error) {
++                  return { error };
++            }
++            var privateKey = txt;
+ 
+-              var {txt,error}     = readfile.txt(pub_name);
+-              if(error){
+-                    return {error};
+-              }
+-              var publicKey       = txt;
++            var { txt, error } = readfile.txt(pub_name);
++            if (error) {
++                  return { error };
++            }
++            var publicKey = txt;
+ 
+-              return {privateKey,publicKey}
++            return { privateKey, publicKey }
+ 
+-        }//generateKeyPair
++      }//generateKeyPair
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.EVP_BytesToKey      = evpBytesToKey;
+-        obj.evp_bytestokey      = evpBytesToKey;
+-        obj.evpBytesToKey       = evpBytesToKey;
+-        obj.evpbytestokey       = evpBytesToKey;
+-        obj.evp_bytes_to_key    = evpBytesToKey;
++      obj.EVP_BytesToKey = evpBytesToKey;
++      obj.evp_bytestokey = evpBytesToKey;
++      obj.evpBytesToKey = evpBytesToKey;
++      obj.evpbytestokey = evpBytesToKey;
++      obj.evp_bytes_to_key = evpBytesToKey;
+ 
+-        async function evpBytesToKey({password,salt=true,keylen=32,ivlen=16}){
++      async function evpBytesToKey({ password, salt = true, keylen = 32, ivlen = 16 }) {
+ 
+-              var crypto    = globalThis.crypto||require('crypto').webcrypto;
++            var crypto = globalThis.crypto || require('crypto').webcrypto;
+ 
+-              if(salt===true){
+-                    salt    = crypto.getRandomValues(new Uint8Array(8));
+-              }
++            if (salt === true) {
++                  salt = crypto.getRandomValues(new Uint8Array(8));
++            }
+ 
+-              password    = await to_uint8(password);
+-              var data    = new Uint8Array(0);
+-              var prev    = new Uint8Array(0);
++            password = await to_uint8(password);
++            var data = new Uint8Array(0);
++            var prev = new Uint8Array(0);
+ 
+-              while(data.length<keylen+ivlen){
++            while (data.length < keylen + ivlen) {
+ 
+-                    var n       = prev.length+password.length;
+-                    if(salt){
+-                          n    += salt.length;
+-                    }
+-                    var input   = new Uint8Array(n);
+-                    input.set(prev,0);
+-                    input.set(password,prev.length);
+-                    if(salt){
+-                          input.set(salt,prev.length+password.length);
+-                    }
++                  var n = prev.length + password.length;
++                  if (salt) {
++                        n += salt.length;
++                  }
++                  var input = new Uint8Array(n);
++                  input.set(prev, 0);
++                  input.set(password, prev.length);
++                  if (salt) {
++                        input.set(salt, prev.length + password.length);
++                  }
+ 
+-                    prev    = await opensslmod.md5(input);
++                  prev = await opensslmod.md5(input);
+ 
+-                    var combined    = new Uint8Array(data.length+prev.length);
+-                    combined.set(data,0);
+-                    combined.set(prev,data.length);
+-                    data    = combined;
++                  var combined = new Uint8Array(data.length + prev.length);
++                  combined.set(data, 0);
++                  combined.set(prev, data.length);
++                  data = combined;
+ 
+-              }//while
++            }//while
+ 
+-              var key   = data.slice(0,keylen);
+-              var iv    = data.slice(keylen,keylen+ivlen);
+-              return {key,iv,salt};
++            var key = data.slice(0, keylen);
++            var iv = data.slice(keylen, keylen + ivlen);
++            return { key, iv, salt };
+ 
+-/*
+-              async function md5(buf){
++            /*
++                          async function md5(buf){
+                           
+-                    var digest    = await crypto.subtle.digest('MD5',buf);
+-                    var uint8     = new Uint8Array(digest);
+-                    return uint8;
++                                var digest    = await crypto.subtle.digest('MD5',buf);
++                                var uint8     = new Uint8Array(digest);
++                                return uint8;
+                                 
+-              }//md5
+-*/
+-        }//evpBytesToKey
++                          }//md5
++            */
++      }//evpBytesToKey
+ 
+ 
+ 
+ 
+ 
+-        obj.pbkdf2    = pbkdf2;
++      obj.pbkdf2 = pbkdf2;
+ 
+-        async function pbkdf2({password,salt=true,iterations=200_000,keylen=32}){
++      async function pbkdf2({ password, salt = true, iterations = 200_000, keylen = 32 }) {
+ 
+-              if(salt===true){
+-                                                                                // standard PBKDF2 salt size
+-                    salt      = crypto.getRandomValues(new Uint8Array(16));
+-              }
+-              if(!salt){
+-                    salt      = new Uint8Array(0);
+-              }
++            if (salt === true) {
++                  // standard PBKDF2 salt size
++                  salt = crypto.getRandomValues(new Uint8Array(16));
++            }
++            if (!salt) {
++                  salt = new Uint8Array(0);
++            }
+ 
+-              var err;
+-              try{
++            var err;
++            try {
+ 
+-                    var keybits     = keylen*8;
+-                    var pw          = new TextEncoder().encode(password);
+-                    var key         = await crypto.subtle.importKey('raw',pw,{name:'PBKDF2'},false,['deriveBits']);
+-                    var bits        = await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations,hash:'SHA-256'},key,keybits);
+-                    var key         = new Uint8Array(bits);
++                  var keybits = keylen * 8;
++                  var pw = new TextEncoder().encode(password);
++                  var key = await crypto.subtle.importKey('raw', pw, { name: 'PBKDF2' }, false, ['deriveBits']);
++                  var bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, key, keybits);
++                  var key = new Uint8Array(bits);
+ 
+-              }//try
+-              catch(err2){
++            }//try
++            catch (err2) {
+ 
+-                    err   = err2;
++                  err = err2;
+ 
+-              }//catch
+-              if(err){
+-                    var error   = err.message;
+-                    return {error};
+-              }
++            }//catch
++            if (err) {
++                  var error = err.message;
++                  return { error };
++            }
+ 
+-              return {key,salt};
++            return { key, salt };
+ 
+-        }//pbkdf2
++      }//pbkdf2
+ 
+ 
+ 
+-        obj.hkdf    = hkdf;
++      obj.hkdf = hkdf;
+ 
+-        async function hkdf({secret,salt=true,info=false,keylen=32}){
++      async function hkdf({ secret, salt = true, info = false, keylen = 32 }) {
+ 
+-              var key_data    = await to_uint8(secret);
++            var key_data = await to_uint8(secret);
+ 
+-              if(salt===true){
+-                                                                                // standard PBKDF2 salt size
+-                    salt      = crypto.getRandomValues(new Uint8Array(16));
+-              }
+-              if(!salt){
+-                                                                                // no-salt mode
+-                    salt      = new Uint8Array(0);
+-              }
+-              if(!info){
+-                                                                                // no-info mode
+-                    info      = new Uint8Array(0);
+-              }
++            if (salt === true) {
++                  // standard PBKDF2 salt size
++                  salt = crypto.getRandomValues(new Uint8Array(16));
++            }
++            if (!salt) {
++                  // no-salt mode
++                  salt = new Uint8Array(0);
++            }
++            if (!info) {
++                  // no-info mode
++                  info = new Uint8Array(0);
++            }
+ 
+-              var err;
+-              try{
++            var err;
++            try {
+ 
+-                    var keybits   = keylen*8;
+-                    var key       = await crypto.subtle.importKey('raw',key_data,'HKDF',false,['deriveBits']);
++                  var keybits = keylen * 8;
++                  var key = await crypto.subtle.importKey('raw', key_data, 'HKDF', false, ['deriveBits']);
+ 
+-                    var bits      = await crypto.subtle.deriveBits({name:'HKDF',hash:'SHA-256',salt,info},key,keybits);
+-                    var key       = new Uint8Array(bits);
++                  var bits = await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, key, keybits);
++                  var key = new Uint8Array(bits);
+ 
+-              }//try
+-              catch(err2){
++            }//try
++            catch (err2) {
+ 
+-                    err   = err2;
++                  err = err2;
+ 
+-              }//catch
+-              if(err){
+-                    var error   = err.message;
+-                    return {error};
+-              }
++            }//catch
++            if (err) {
++                  var error = err.message;
++                  return { error };
++            }
+ 
+-              return {key,salt,info};
++            return { key, salt, info };
+ 
+-        }//hkdf
++      }//hkdf
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.config_ini    = config_ini;
+-        obj.configToIni   = config_ini;
++      obj.config_ini = config_ini;
++      obj.configToIni = config_ini;
+ 
+-        function config_ini(def){
++      function config_ini(def) {
+ 
+-              if(typeof def=='string'){
+-                    def   = opensslmod.config[def]()||{};
+-              }
++            if (typeof def == 'string') {
++                  def = opensslmod.config[def]() || {};
++            }
+ 
+-              var lines   = [];
+-                                                                                // --- [req] ---
+-              lines.push('[req]');
+-              lines.push('distinguished_name = dn');
+-              lines.push('x509_extensions = v3_ext');
+-              lines.push('prompt = no');
+-              lines.push('');
+-              
+-                                                                                // --- [dn] ---
+-              lines.push('[dn]');
+-              for(var [k,v] of Object.entries(def.dn||{})){
+-              
+-                    lines.push(`${k} = ${v}`);
+-                    
+-              }//for
+-              lines.push('');
+-              
+-                                                                                // --- [v3_req] ---
+-              lines.push('[v3_ext]');
+-              
+-              var ext   = def.ext||{};
+-              
+-                                                                                // basicConstraints
+-              if(ext.basicConstraints){
+-                    var bc      = ext.basicConstraints;
+-                    var crit    = bc.critical ? 'critical,' : '';
+-                    var ca      = bc.ca ? 'CA:TRUE' : 'CA:FALSE';
+-                    var path    = '';
+-                    if(bc.ca){
+-                          path    = ('pathlen' in bc) ? `,pathlen:${bc.pathlen}` : '';
+-                    }
+-                    lines.push(`basicConstraints = ${crit}${ca}${path}`);
+-              }
+-              
+-                                                                                // keyUsage
+-              if(ext.keyUsage && ext.keyUsage.length){
+-                    var crit    = ext.keyUsageCritical ? 'critical,' : '';
+-                    lines.push(`keyUsage = ${crit}${ext.keyUsage.join(',')}`);
+-              }
+-              
+-                                                                                // extendedKeyUsage
+-              if(ext.extendedKeyUsage && ext.extendedKeyUsage.length){
+-                    var crit    = ext.extendedKeyUsageCritical ? 'critical,' : '';
+-                    lines.push(`extendedKeyUsage = ${crit}${ext.extendedKeyUsage.join(',')}`);
+-              }
+-                                                                                // subjectKeyIdentifier
+-              if(ext.subjectKeyIdentifier){
+-                    lines.push(`subjectKeyIdentifier = ${ext.subjectKeyIdentifier}`);
+-              }
+-                                                                                // authorityKeyIdentifier
+-              if(ext.authorityKeyIdentifier){
+-                    lines.push(`authorityKeyIdentifier = ${ext.authorityKeyIdentifier}`);
+-              }
+-              
+-              
+-                                                                                // SAN
+-              if(ext.san){
+-                    lines.push('subjectAltName = @alt_names');
+-              }
+-                                                                                // name constraints
+-              if(ext.nameConstraints){
+-                    lines.push('nameConstraints = @name_constraints');
+-              }
+-              
+-              lines.push('');
+-              
+-                                                                                // --- [alt_names] ---
+-              if(ext.san){
+-                    lines.push('[alt_names]');
+-                    var san   = ext.san;
+-                    
+-                    if(san.dns){
+-                          san.dns.forEach((v,i)=>lines.push(`DNS.${i+1} = ${v}`));
+-                    }
+-                    if(san.ip){
+-                          san.ip.forEach((v,i)=>lines.push(`IP.${i+1} = ${v}`));
+-                    }
+-                    if(san.email){
+-                          san.email.forEach((v,i)=>lines.push(`email.${i+1} = ${v}`));
+-                    }
+-                    if(san.uri){
+-                          san.uri.forEach((v,i)=>lines.push(`URI.${i+1} = ${v}`));
+-                    }
+-                    
+-                    lines.push('');
+-              }
+-              
+-              if(ext.nameConstraints){
+-                    lines.push('[name_constraints]');
+-                    var permitted   = ext.nameConstraints.permitted;
+-                    if(permitted.dns){
+-                          permitted.dns.forEach((v,i)=>lines.push(`permitted;DNS.${i+1} = ${v}`));
+-                    }
+-                    if(permitted.ip){
+-                          permitted.ip.forEach((v,i)=>lines.push(`permitted;IP.${i+1} = ${v}`));
+-                    }
+-                    var excluded    = ext.nameConstraints.excluded;
+-                    if(excluded.dns){
+-                          excluded.dns.forEach((v,i)=>lines.push(`excluded;DNS.${i+1} = ${v}`));
+-                    }
+-                    if(excluded.ip){
+-                          excluded.ip.forEach((v,i)=>lines.push(`excluded;IP.${i+1} = ${v}`));
+-                    }
+-              }
+-              
+-              var ini   = lines.join('\n');
+-              return ini;
+-              
+-        }//config_ini
+-        
+-        
+-  //:
+-  
+-  
+-        obj.sign    = async function({
+-              privateKey,value,
+-              key_name='private.key',file_name='file.bin',sig_name='sig.bin'
+-        }){
+-                                                                                debug.log('sign');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(privateKey){
+-                    var {error}   = await writefile(key_name,privateKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {error}    = await run(
+-                    `openssl pkeyutl -sign -inkey ${key_name} -in ${file_name} -out ${sig_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              
+-              var {uint8,error}   = await readfile(sig_name);
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var sig         = uint8;
+-              var signature   = sig;
+-              return {sig,signature};
+-              
+-        }//sign
+-        
+-        
+-        obj.sign.verify    = async function({
+-              publicKey,signature,value,sig,
+-              pub_name='public.key',file_name='file.bin',sig_name='sig.bin'
+-        }){
+-                                                                                debug.log('verify');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              signature   ||= sig;
+-              
+-              if(publicKey){
+-                    var {error}   = await writefile(pub_name,publicKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(signature){
+-                    var {error}   = await writefile(sig_name,signature);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl pkeyutl -verify -pubin -inkey ${pub_name} -in ${file_name} -sigfile ${sig_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var result    = false;
+-              if(code===0){
+-                    result    = true;
+-              }
+-              
+-              return {result};
+-              
+-        }//verify
+-        
+-        
+-  //:
+-  
+-  
+-        obj.cert    = async function({
+-              caKey,caCert,privateKey,config,
+-              days=365,
+-              key_name='private.key',cert_name='cert.pem',csr_name='csr.pem',config_name='config.ini',ca_key_name='ca.key',ca_cert_name='ca.cert'
+-        }){
+-                                                                                debug.log('cert');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(privateKey){
+-                    var {error}   = await writefile(key_name,privateKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(config){
+-                    var {error}   = await writefile.config(config_name,config);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(caKey){
+-                    var {error}   = await writefile(ca_key_name,caKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(caCert){
+-                    var {error}   = await writefile(ca_cert_name,caCert);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl req -new -key ${key_name} -out ${csr_name} -config ${config_name}`,
+-                    `openssl x509 -req -in ${csr_name} -CA ${ca_cert_name} -CAkey ${ca_key_name} -CAcreateserial -out ${cert_name} -days ${days} -extensions v3_ext -extfile ${config_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {txt,error}    = readfile.txt(cert_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var cert    = txt;
+-              return {cert};
+-              
+-        }//cert
+-        
+-        
+-        obj.cert.verify    = async function({
+-              cert,caCert,chainPem,trustedPem,
+-              cert_name='cert.pem',ca_cert_name='ca.cert',chain_name='chain.pem',trusted_name='trusted.pem'
+-        }){
+-                                                                                debug.log('verify');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(cert){
+-                    var {error}   = await writefile(cert_name,cert);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(caCert){
+-                    var {error}   = await writefile(ca_cert_name,caCert);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(chainPem){
+-                    var {error}   = await writefile(chain_name,chainPem);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(trustedPem){
+-                    var {error}   = await writefile(trusted_name,trustedPem);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              
+-              var cmd   = 'openssl verify'
+-              if(caCert){
+-                    cmd  += ` -CAfile ${ca_cert_name}`;
+-              }
+-              if(chainPem){
+-                    cmd  += ` -untrusted ${chain_name}`;
+-              }
+-              if(trustedPem){
+-                    cmd  += ` -trusted ${trusted_name}`;
+-              }
+-              cmd  += ` ${cert_name}`;
+-              
+-              var {Module,code,error}    = await run(cmd);
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              
+-              var result    = false;
+-              if(code===0){
+-                    result    = true;
+-              }
+-                                                                                debug.log('result',result);
+-              return {result};
+-              
+-        }//verify
+-        
+-        
+-        obj.selfsigned    = selfsigned;
+-        obj.selfSigned    = selfsigned;
+-        
+-        async function selfsigned({
+-              config,privateKey,
+-              keybits=4096,days=365,
+-              key_name='private.key',cert_name='cert.pem',config_name='config.ini'
+-        }){
+-                                                                                debug.log('selfSigned');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(config){
+-                    var {error}   = await writefile.config(config_name,config);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(privateKey){
+-                    var {error}   = await writefile(key_name,privateKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              
+-              var keycmd;
+-              if(privateKey){
+-                    keycmd    = `-key ${key_name}`;
+-              }else{
+-                    keycmd    = `-newkey rsa:${keybits}`;
+-              }
+-              var cmd   = `openssl req -x509 ${keycmd} -keyout ${key_name} -out ${cert_name} -days ${days} -nodes -config ${config_name}`;
+-              
+-              var {Module,error,code}    = await run(cmd);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('code',code);
+-              var {txt,error}   = readfile.txt(key_name);
+-              if(error){
+-                    return {error};
+-              }
+-              privateKey    = txt;
+-              
+-              var {txt,error}   = readfile.txt(cert_name);
+-              if(error){
+-                    return {error};
+-              }
+-              var cert    = txt;
+-              
+-              return {privateKey,cert};
+-              
+-        }//selfSigned
+-        
+-        
+-  //:
+-  
+-  
+-        obj.encrypt   = encrypt;
+-        
+-        async function encrypt({
+-              key,value,iv=null,
+-              cipher='aes-256-ctr',ivlen=16,
+-              file_name='file.bin',enc_name='enc.bin'
+-        }){
+-                                                                                //  only valid key length is 256 bits (32 bytes).
+-                                                                                debug.log('encrypt');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(!key){
+-                    key   = rndbytes(32);
+-              }
+-              var uint8     = await to_uint8(key);
+-              var keyhex    = to_hex(uint8);
+-              
+-              if(!iv){
+-                    iv    = crypto.getRandomValues(new Uint8Array(ivlen));
+-              }
+-              var ivhex     = to_hex(iv);
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl enc -${cipher} -K ${keyhex} -iv ${ivhex} -in ${file_name} -out ${enc_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var {uint8,error}   = readfile(enc_name);
+-              if(error){
+-                    return {error};
+-              }
+-              var encrypted   = uint8;
+-              
+-              return {encrypted,iv,key};
+-              
+-        }//encrypt
+-        
+-        
+-        obj.decrypt   = decrypt;
+-        
+-        async function decrypt({
+-              key,iv,value,
+-              cipher='aes-256-ctr',
+-              enc_name='enc.bin',dec_name='dec.bin'
+-        }){
+-                                                                                debug.log('decrypt');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(enc_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var uint8     = await to_uint8(key);
+-              var keyhex    = to_hex(key);
+-              var uint8     = await to_uint8(iv);
+-              var ivhex     = to_hex(iv);
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl enc -${cipher} -d -K ${keyhex} -iv ${ivhex} -in ${enc_name} -out ${dec_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var {uint8,error}   = readfile(dec_name);
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var decrypted   = uint8;
+-              return {decrypted};
+-              
+-        }//decrypt
+-        
+-        
+-  //:
+-  
+-  
+-        encrypt.password    = async function({
+-              password,value,
+-              file_name='file.bin',enc_name='enc.bin'
+-        }){
+-                                                                                debug.log('encrypt.password');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl enc -aes-256-cbc -salt -in ${file_name} -out ${enc_name} -pass pass:${password}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = readfile(enc_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var encrypted   = uint8;
+-              return {encrypted};
+-              
+-        }//encrypt.password
+-        
+-        
+-        decrypt.password    = async function({
+-              password,value,
+-              enc_name='enc.bin',dec_name='dec.bin'
+-        }){
+-                                                                                debug.log('decrypt.password');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(enc_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl enc -aes-256-cbc -d -salt -in ${enc_name} -out ${dec_name} -pass pass:${password}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(dec_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var decrypted   = uint8;
+-              return {decrypted};
+-              
+-        }//decrypt.password
+-        
+-        
+-  //:
+-  
+-  
+-        encrypt.rsa    = async function({
+-              publicKey,value,
+-              pub_name='public.key',file_name='file.bin',enc_name='enc.bin'
+-        }){
+-                                                                                debug.log('encrypt.rsa');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(publicKey){
+-                    var {error}   = await writefile(pub_name,publicKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl pkeyutl -encrypt -inkey ${pub_name} -pubin -in ${file_name} -out ${enc_name} -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(enc_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var encrypted   = uint8;
+-              return {encrypted};
+-              
+-        }//encrypt.rsa
+-        
+-        
+-        decrypt.rsa    = async function({
+-              privateKey,value,
+-              priv_name='private.key',enc_name='enc.bin',dec_name='dec.bin'
+-        }){
+-                                                                                debug.log('decrypt.rsa');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {error}   = await writefile(priv_name,privateKey);
+-              if(error){
+-                    return {error};
+-              }
+-              var {error}   = await writefile(enc_name,value);
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl pkeyutl -decrypt -inkey ${priv_name} -in ${enc_name} -out ${dec_name} -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(dec_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var decrypted   = uint8;
+-              return {decrypted};
+-              
+-        }//decrypt.rsa
+-        
+-        
+-  //:
+-  
+-  
+-        encrypt.pkcs1   = async function({
+-              publicKey,value,
+-              pub_name='public.key',file_name='file.bin',enc_name='enc.bin'
+-        }){
+-                                                                                //  Legacy command — PKCS#1 v1.5 (old, deprecated, unsafe)
+-                                                                                debug.log('encrypt.pkcs1');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(publicKey){
+-                    var {error}   = await writefile(pub_name,publicKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl rsautl -encrypt -inkey ${pub_name} -pubin -in ${file_name} -out ${enc_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(enc_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var encrypted   = uint8;
+-              return {encrypted};
+-              
+-        }//encrypt.pkcs1
+-        
+-        
+-        decrypt.pkcs1   = async function({
+-              privateKey,value,
+-              priv_name='private.key',enc_name='enc.bin',dec_name='dec.bin'
+-        }){
+-                                                                                debug.log('decrypt.pkcs1');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(privateKey){
+-                    var {error}   = await writefile(priv_name,privateKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(enc_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl rsautl -decrypt -inkey ${priv_name} -in ${enc_name} -out ${dec_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(dec_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var decrypted   = uint8;
+-              return {decrypted};
+-              
+-        }//decrypt.pkcs1
+-        
+-        
+-  //:
+-  
+-  
+-        encrypt.elipticCurve    = function(){return encrypt.ec.apply(null,arguments)}
+-        
+-        encrypt.ec    = async function({
+-              cert,value,
+-              cert_name='cert.pem',file_name='file.bin',enc_name='enc.bin'
+-        }){
+-                                                                                debug.log('encrypt.ec');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(cert){
+-                    var {error}   = await writefile(cert_name,cert);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl cms -encrypt -in ${file_name} -out ${enc_name} -outform DER ${cert_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(enc_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var encrypted   = uint8;
+-              return {encrypted};
+-              
+-        }//encrypt.ec
+-        
+-        
+-        decrypt.elipticCurve    = function(){return decrypt.ec.apply(null,arguments)}
+-        
+-        decrypt.ec    = async function({
+-              privateKey,value,
+-              priv_name='pivate.key',enc_name='enc.bin',dec_name='dec.bin'
+-        }){
+-                                                                                debug.log('decrypt.ec');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(privateKey){
+-                    var {error}   = await writefile(priv_name,privateKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(enc_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl cms -decrypt -in ${enc_name} -inform DER -inkey ${priv_name} -out ${dec_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(dec_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var decrypted   = uint8;
+-              return {decrypted};
+-              
+-        }//decrypt.ec
+-        
+-        
+-  //:
+-  
+-  
+-        encrypt.smime   = async function({
+-              cert,value,
+-              outform='PEM',
+-              cert_name='cert.pem',file_name='file.bin',enc_name='enc.bin'
+-        }){
+-                                                                                debug.log('encrypt.smime');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(cert){
+-                    var {error}   = await writefile(cert_name,cert);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(value){
+-                    var {error}   = await writefile(file_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              var {Module,code,error}    = await run(
+-                    `openssl smime -encrypt -aes256 -in ${file_name} -outform ${outform} -out ${enc_name} ${cert_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-              
+-              var {uint8,error}   = await readfile(enc_name);
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var encrypted   = uint8;
+-              return {encrypted};
+-              
+-        }//encrypt.smime
+-        
+-        
+-        decrypt.smime   = async function({
+-              privateKey,value,
+-              inform='PEM',
+-              priv_name='private.key',enc_name='enc.bin',dec_name='dec.bin'
+-        }){
+-                                                                                debug.log('decrypt.smime');
+-              if(!cur){
+-                    var {error}   = await init();
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
+-              
+-              if(privateKey){
+-                    var {error}   = await writefile(priv_name,privateKey);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
++            var lines = [];
++            // --- [req] ---
++            lines.push('[req]');
++            lines.push('distinguished_name = dn');
++            lines.push('x509_extensions = v3_ext');
++            lines.push('prompt = no');
++            lines.push('');
++
++            // --- [dn] ---
++            lines.push('[dn]');
++            for (var [k, v] of Object.entries(def.dn || {})) {
++
++                  lines.push(`${k} = ${v}`);
++
++            }//for
++            lines.push('');
++
++            // --- [v3_req] ---
++            lines.push('[v3_ext]');
++
++            var ext = def.ext || {};
++
++            // basicConstraints
++            if (ext.basicConstraints) {
++                  var bc = ext.basicConstraints;
++                  var crit = bc.critical ? 'critical,' : '';
++                  var ca = bc.ca ? 'CA:TRUE' : 'CA:FALSE';
++                  var path = '';
++                  if (bc.ca) {
++                        path = ('pathlen' in bc) ? `,pathlen:${bc.pathlen}` : '';
++                  }
++                  lines.push(`basicConstraints = ${crit}${ca}${path}`);
++            }
++
++            // keyUsage
++            if (ext.keyUsage && ext.keyUsage.length) {
++                  var crit = ext.keyUsageCritical ? 'critical,' : '';
++                  lines.push(`keyUsage = ${crit}${ext.keyUsage.join(',')}`);
++            }
++
++            // extendedKeyUsage
++            if (ext.extendedKeyUsage && ext.extendedKeyUsage.length) {
++                  var crit = ext.extendedKeyUsageCritical ? 'critical,' : '';
++                  lines.push(`extendedKeyUsage = ${crit}${ext.extendedKeyUsage.join(',')}`);
++            }
++            // subjectKeyIdentifier
++            if (ext.subjectKeyIdentifier) {
++                  lines.push(`subjectKeyIdentifier = ${ext.subjectKeyIdentifier}`);
++            }
++            // authorityKeyIdentifier
++            if (ext.authorityKeyIdentifier) {
++                  lines.push(`authorityKeyIdentifier = ${ext.authorityKeyIdentifier}`);
++            }
++
++
++            // SAN
++            if (ext.san) {
++                  lines.push('subjectAltName = @alt_names');
++            }
++            // name constraints
++            if (ext.nameConstraints) {
++                  lines.push('nameConstraints = @name_constraints');
++            }
++
++            lines.push('');
++
++            // --- [alt_names] ---
++            if (ext.san) {
++                  lines.push('[alt_names]');
++                  var san = ext.san;
++
++                  if (san.dns) {
++                        san.dns.forEach((v, i) => lines.push(`DNS.${i + 1} = ${v}`));
++                  }
++                  if (san.ip) {
++                        san.ip.forEach((v, i) => lines.push(`IP.${i + 1} = ${v}`));
++                  }
++                  if (san.email) {
++                        san.email.forEach((v, i) => lines.push(`email.${i + 1} = ${v}`));
++                  }
++                  if (san.uri) {
++                        san.uri.forEach((v, i) => lines.push(`URI.${i + 1} = ${v}`));
++                  }
++
++                  lines.push('');
++            }
++
++            if (ext.nameConstraints) {
++                  lines.push('[name_constraints]');
++                  var permitted = ext.nameConstraints.permitted;
++                  if (permitted.dns) {
++                        permitted.dns.forEach((v, i) => lines.push(`permitted;DNS.${i + 1} = ${v}`));
++                  }
++                  if (permitted.ip) {
++                        permitted.ip.forEach((v, i) => lines.push(`permitted;IP.${i + 1} = ${v}`));
++                  }
++                  var excluded = ext.nameConstraints.excluded;
++                  if (excluded.dns) {
++                        excluded.dns.forEach((v, i) => lines.push(`excluded;DNS.${i + 1} = ${v}`));
++                  }
++                  if (excluded.ip) {
++                        excluded.ip.forEach((v, i) => lines.push(`excluded;IP.${i + 1} = ${v}`));
++                  }
++            }
++
++            var ini = lines.join('\n');
++            return ini;
++
++      }//config_ini
++
++
++      //:
++
++
++      obj.sign = async function ({
++            privateKey, value,
++            key_name = 'private.key', file_name = 'file.bin', sig_name = 'sig.bin'
++      }) {
++            debug.log('sign');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (privateKey) {
++                  var { error } = await writefile(key_name, privateKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { error } = await run(
++                  `openssl pkeyutl -sign -inkey ${key_name} -in ${file_name} -out ${sig_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++
++            var { uint8, error } = await readfile(sig_name);
++            if (error) {
++                  return { error };
++            }
++
++            var sig = uint8;
++            var signature = sig;
++            return { sig, signature };
++
++      }//sign
++
++
++      obj.sign.verify = async function ({
++            publicKey, signature, value, sig,
++            pub_name = 'public.key', file_name = 'file.bin', sig_name = 'sig.bin'
++      }) {
++            debug.log('verify');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            signature ||= sig;
++
++            if (publicKey) {
++                  var { error } = await writefile(pub_name, publicKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (signature) {
++                  var { error } = await writefile(sig_name, signature);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl pkeyutl -verify -pubin -inkey ${pub_name} -in ${file_name} -sigfile ${sig_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var result = false;
++            if (code === 0) {
++                  result = true;
++            }
++
++            return { result };
++
++      }//verify
++
++
++      //:
++
++
++      obj.cert = async function ({
++            caKey, caCert, privateKey, config,
++            days = 365,
++            key_name = 'private.key', cert_name = 'cert.pem', csr_name = 'csr.pem', config_name = 'config.ini', ca_key_name = 'ca.key', ca_cert_name = 'ca.cert'
++      }) {
++            debug.log('cert');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (privateKey) {
++                  var { error } = await writefile(key_name, privateKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (config) {
++                  var { error } = await writefile.config(config_name, config);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (caKey) {
++                  var { error } = await writefile(ca_key_name, caKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (caCert) {
++                  var { error } = await writefile(ca_cert_name, caCert);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl req -new -key ${key_name} -out ${csr_name} -config ${config_name}`,
++                  `openssl x509 -req -in ${csr_name} -CA ${ca_cert_name} -CAkey ${ca_key_name} -CAcreateserial -out ${cert_name} -days ${days} -extensions v3_ext -extfile ${config_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { txt, error } = readfile.txt(cert_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var cert = txt;
++            return { cert };
++
++      }//cert
++
++
++      obj.cert.verify = async function ({
++            cert, caCert, chainPem, trustedPem,
++            cert_name = 'cert.pem', ca_cert_name = 'ca.cert', chain_name = 'chain.pem', trusted_name = 'trusted.pem'
++      }) {
++            debug.log('verify');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (cert) {
++                  var { error } = await writefile(cert_name, cert);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (caCert) {
++                  var { error } = await writefile(ca_cert_name, caCert);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (chainPem) {
++                  var { error } = await writefile(chain_name, chainPem);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (trustedPem) {
++                  var { error } = await writefile(trusted_name, trustedPem);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++
++            var cmd = 'openssl verify'
++            if (caCert) {
++                  cmd += ` -CAfile ${ca_cert_name}`;
++            }
++            if (chainPem) {
++                  cmd += ` -untrusted ${chain_name}`;
++            }
++            if (trustedPem) {
++                  cmd += ` -trusted ${trusted_name}`;
++            }
++            cmd += ` ${cert_name}`;
++
++            var { Module, code, error } = await run(cmd);
++            if (error) {
++                  return { error };
++            }
++
++
++            var result = false;
++            if (code === 0) {
++                  result = true;
++            }
++            debug.log('result', result);
++            return { result };
++
++      }//verify
++
++
++      obj.selfsigned = selfsigned;
++      obj.selfSigned = selfsigned;
++
++      async function selfsigned({
++            config, privateKey,
++            keybits = 4096, days = 365,
++            key_name = 'private.key', cert_name = 'cert.pem', config_name = 'config.ini'
++      }) {
++            debug.log('selfSigned');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (config) {
++                  var { error } = await writefile.config(config_name, config);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (privateKey) {
++                  var { error } = await writefile(key_name, privateKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++
++            var keycmd;
++            if (privateKey) {
++                  keycmd = `-key ${key_name}`;
++            } else {
++                  keycmd = `-newkey rsa:${keybits}`;
++            }
++            var cmd = `openssl req -x509 ${keycmd} -keyout ${key_name} -out ${cert_name} -days ${days} -nodes -config ${config_name}`;
++
++            var { Module, error, code } = await run(cmd);
++            if (error) {
++                  return { error };
++            }
++            debug.log('code', code);
++            var { txt, error } = readfile.txt(key_name);
++            if (error) {
++                  return { error };
++            }
++            privateKey = txt;
++
++            var { txt, error } = readfile.txt(cert_name);
++            if (error) {
++                  return { error };
++            }
++            var cert = txt;
++
++            return { privateKey, cert };
++
++      }//selfSigned
++
++
++      //:
++
++
++      obj.encrypt = encrypt;
++
++      async function encrypt({
++            key, value, iv = null,
++            cipher = 'aes-256-ctr', ivlen = 16,
++            file_name = 'file.bin', enc_name = 'enc.bin'
++      }) {
++            //  only valid key length is 256 bits (32 bytes).
++            debug.log('encrypt');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (!key) {
++                  key = rndbytes(32);
++            }
++            var uint8 = await to_uint8(key);
++            var keyhex = to_hex(uint8);
++
++            if (!iv) {
++                  iv = crypto.getRandomValues(new Uint8Array(ivlen));
++            }
++            var ivhex = to_hex(iv);
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl enc -${cipher} -K ${keyhex} -iv ${ivhex} -in ${file_name} -out ${enc_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var { uint8, error } = readfile(enc_name);
++            if (error) {
++                  return { error };
++            }
++            var encrypted = uint8;
++
++            return { encrypted, iv, key };
++
++      }//encrypt
++
++
++      obj.decrypt = decrypt;
++
++      async function decrypt({
++            key, iv, value,
++            cipher = 'aes-256-ctr',
++            enc_name = 'enc.bin', dec_name = 'dec.bin'
++      }) {
++            debug.log('decrypt');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(enc_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var uint8 = await to_uint8(key);
++            var keyhex = to_hex(key);
++            var uint8 = await to_uint8(iv);
++            var ivhex = to_hex(iv);
++
++            var { Module, code, error } = await run(
++                  `openssl enc -${cipher} -d -K ${keyhex} -iv ${ivhex} -in ${enc_name} -out ${dec_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var { uint8, error } = readfile(dec_name);
++            if (error) {
++                  return { error };
++            }
++
++            var decrypted = uint8;
++            return { decrypted };
++
++      }//decrypt
++
++
++      //:
++
++
++      encrypt.password = async function ({
++            password, value,
++            file_name = 'file.bin', enc_name = 'enc.bin'
++      }) {
++            debug.log('encrypt.password');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl enc -aes-256-cbc -salt -in ${file_name} -out ${enc_name} -pass pass:${password}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = readfile(enc_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var encrypted = uint8;
++            return { encrypted };
++
++      }//encrypt.password
++
++
++      decrypt.password = async function ({
++            password, value,
++            enc_name = 'enc.bin', dec_name = 'dec.bin'
++      }) {
++            debug.log('decrypt.password');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(enc_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl enc -aes-256-cbc -d -salt -in ${enc_name} -out ${dec_name} -pass pass:${password}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(dec_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var decrypted = uint8;
++            return { decrypted };
++
++      }//decrypt.password
++
++
++      //:
++
++
++      encrypt.rsa = async function ({
++            publicKey, value,
++            pub_name = 'public.key', file_name = 'file.bin', enc_name = 'enc.bin'
++      }) {
++            debug.log('encrypt.rsa');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (publicKey) {
++                  var { error } = await writefile(pub_name, publicKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl pkeyutl -encrypt -inkey ${pub_name} -pubin -in ${file_name} -out ${enc_name} -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(enc_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var encrypted = uint8;
++            return { encrypted };
++
++      }//encrypt.rsa
++
++
++      decrypt.rsa = async function ({
++            privateKey, value,
++            priv_name = 'private.key', enc_name = 'enc.bin', dec_name = 'dec.bin'
++      }) {
++            debug.log('decrypt.rsa');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { error } = await writefile(priv_name, privateKey);
++            if (error) {
++                  return { error };
++            }
++            var { error } = await writefile(enc_name, value);
++            if (error) {
++                  return { error };
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl pkeyutl -decrypt -inkey ${priv_name} -in ${enc_name} -out ${dec_name} -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(dec_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var decrypted = uint8;
++            return { decrypted };
++
++      }//decrypt.rsa
++
++
++      //:
++
++
++      encrypt.pkcs1 = async function ({
++            publicKey, value,
++            pub_name = 'public.key', file_name = 'file.bin', enc_name = 'enc.bin'
++      }) {
++            //  Legacy command — PKCS#1 v1.5 (old, deprecated, unsafe)
++            debug.log('encrypt.pkcs1');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (publicKey) {
++                  var { error } = await writefile(pub_name, publicKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl rsautl -encrypt -inkey ${pub_name} -pubin -in ${file_name} -out ${enc_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(enc_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var encrypted = uint8;
++            return { encrypted };
++
++      }//encrypt.pkcs1
++
++
++      decrypt.pkcs1 = async function ({
++            privateKey, value,
++            priv_name = 'private.key', enc_name = 'enc.bin', dec_name = 'dec.bin'
++      }) {
++            debug.log('decrypt.pkcs1');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (privateKey) {
++                  var { error } = await writefile(priv_name, privateKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(enc_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl rsautl -decrypt -inkey ${priv_name} -in ${enc_name} -out ${dec_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(dec_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var decrypted = uint8;
++            return { decrypted };
++
++      }//decrypt.pkcs1
++
++
++      //:
++
++
++      encrypt.elipticCurve = function () { return encrypt.ec.apply(null, arguments) }
++
++      encrypt.ec = async function ({
++            cert, value,
++            cert_name = 'cert.pem', file_name = 'file.bin', enc_name = 'enc.bin'
++      }) {
++            debug.log('encrypt.ec');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (cert) {
++                  var { error } = await writefile(cert_name, cert);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl cms -encrypt -in ${file_name} -out ${enc_name} -outform DER ${cert_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(enc_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var encrypted = uint8;
++            return { encrypted };
++
++      }//encrypt.ec
++
++
++      decrypt.elipticCurve = function () { return decrypt.ec.apply(null, arguments) }
++
++      decrypt.ec = async function ({
++            privateKey, value,
++            priv_name = 'pivate.key', enc_name = 'enc.bin', dec_name = 'dec.bin'
++      }) {
++            debug.log('decrypt.ec');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (privateKey) {
++                  var { error } = await writefile(priv_name, privateKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(enc_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl cms -decrypt -in ${enc_name} -inform DER -inkey ${priv_name} -out ${dec_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(dec_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var decrypted = uint8;
++            return { decrypted };
++
++      }//decrypt.ec
++
++
++      //:
++
++
++      encrypt.smime = async function ({
++            cert, value,
++            outform = 'PEM',
++            cert_name = 'cert.pem', file_name = 'file.bin', enc_name = 'enc.bin'
++      }) {
++            debug.log('encrypt.smime');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (cert) {
++                  var { error } = await writefile(cert_name, cert);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (value) {
++                  var { error } = await writefile(file_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            var { Module, code, error } = await run(
++                  `openssl smime -encrypt -aes256 -in ${file_name} -outform ${outform} -out ${enc_name} ${cert_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++
++            var { uint8, error } = await readfile(enc_name);
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var encrypted = uint8;
++            return { encrypted };
++
++      }//encrypt.smime
++
++
++      decrypt.smime = async function ({
++            privateKey, value,
++            inform = 'PEM',
++            priv_name = 'private.key', enc_name = 'enc.bin', dec_name = 'dec.bin'
++      }) {
++            debug.log('decrypt.smime');
++            if (!cur) {
++                  var { error } = await init();
++                  if (error) {
++                        return { error };
++                  }
++            }
++
++            if (privateKey) {
++                  var { error } = await writefile(priv_name, privateKey);
++                  if (error) {
++                        return { error };
++                  }
++            }
+ 
+-              if(value){
+-                    var {error}   = await writefile(enc_name,value);
+-                    if(error){
+-                          return {error};
+-                    }
+-              }
++            if (value) {
++                  var { error } = await writefile(enc_name, value);
++                  if (error) {
++                        return { error };
++                  }
++            }
+ 
+-              var {Module,code,error}    = await run(
+-                    `openssl smime -decrypt -inform ${inform} -in ${enc_name} -inkey ${priv_name} -out ${dec_name}`
+-              );
+-              if(error){
+-                    return {error};
+-              }
+-                                                                                debug.log('ok');
+-              var {uint8,error}   = await readfile(dec_name);
+-              if(error){
+-                    return {error};
+-              }
++            var { Module, code, error } = await run(
++                  `openssl smime -decrypt -inform ${inform} -in ${enc_name} -inkey ${priv_name} -out ${dec_name}`
++            );
++            if (error) {
++                  return { error };
++            }
++            debug.log('ok');
++            var { uint8, error } = await readfile(dec_name);
++            if (error) {
++                  return { error };
++            }
+ 
+-              var decrypted   = uint8;
+-              return {decrypted};
++            var decrypted = uint8;
++            return { decrypted };
+ 
+-        }//decrypt.smime
++      }//decrypt.smime
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.readfile    = readfile;
+-        obj.readFile    = readfile;
++      obj.readfile = readfile;
++      obj.readFile = readfile;
+ 
+-        function readfile(name,{Module}={}){
++      function readfile(name, { Module } = {}) {
+ 
+-              Module    ||= cur;
+-              if(!Module){
+-                    var error   = 'no Module';
+-                    return {error};
+-              }
++            Module ||= cur;
++            if (!Module) {
++                  var error = 'no Module';
++                  return { error };
++            }
+ 
+-              var err;
+-              try{
++            var err;
++            try {
+ 
+-                    var uint8   = Module.FS.readFile(name);
++                  var uint8 = Module.FS.readFile(name);
+ 
+-              }//try
+-              catch(err2){
++            }//try
++            catch (err2) {
+ 
+-                    err   = err2;
++                  err = err2;
+ 
+-              }//catch
+-              if(err){
+-                    var error   = err.message;
+-                    return {error};
+-              }
++            }//catch
++            if (err) {
++                  var error = err.message;
++                  return { error };
++            }
+ 
+-              return {uint8};
++            return { uint8 };
+ 
+-        }//readfile
++      }//readfile
+ 
+ 
+-        readfile.uint8    = function(name,{Module}={}){
++      readfile.uint8 = function (name, { Module } = {}) {
+ 
+-              var result    = readfile.apply(null,arguments);
+-              return result;
++            var result = readfile.apply(null, arguments);
++            return result;
+ 
+-        }//uint8
++      }//uint8
+ 
+ 
+-        readfile.txt    = function(name,{Module}={}){
++      readfile.txt = function (name, { Module } = {}) {
+ 
+-              var {uint8,error}   = readfile(name,{Module});
+-              if(error){
+-                    return {error};
+-              }
+-              var txt   = new TextDecoder().decode(uint8);
+-              return {txt};
++            var { uint8, error } = readfile(name, { Module });
++            if (error) {
++                  return { error };
++            }
++            var txt = new TextDecoder().decode(uint8);
++            return { txt };
+ 
+-        }//txt
++      }//txt
+ 
+ 
+-        readfile.blob   = function(name,{Module}={}){
++      readfile.blob = function (name, { Module } = {}) {
+ 
+-              var {uint8,error}   = readfile(name,{Module});
+-              if(error){
+-                    return {error};
+-              }
+-              var blob    = new Blob([uint8]);
+-              return {blob};
++            var { uint8, error } = readfile(name, { Module });
++            if (error) {
++                  return { error };
++            }
++            var blob = new Blob([uint8]);
++            return { blob };
+ 
+-        }//blob
++      }//blob
+ 
+ 
+-        obj.writefile   = writefile;
+-        obj.writeFile   = writefile;
++      obj.writefile = writefile;
++      obj.writeFile = writefile;
+ 
+-        async function writefile(name,value,{Module}={}){
++      async function writefile(name, value, { Module } = {}) {
+ 
+-              var uint8         = await to_uint8(value);
+-              var {ok,error}    = writefile.uint8(name,uint8,{Module});
+-              if(error){
+-                    return {error};
+-              }
+-              return {ok};
++            var uint8 = await to_uint8(value);
++            var { ok, error } = writefile.uint8(name, uint8, { Module });
++            if (error) {
++                  return { error };
++            }
++            return { ok };
+ 
+-        }//writefile
++      }//writefile
+ 
+ 
+-        writefile.uint8   = function(name,uint8,{Module}={}){
++      writefile.uint8 = function (name, uint8, { Module } = {}) {
+ 
+-              Module    ||= cur;
+-              if(!Module){
+-                    var error   = 'no Module';
+-                    return {error};
+-              }
++            Module ||= cur;
++            if (!Module) {
++                  var error = 'no Module';
++                  return { error };
++            }
+ 
+-              Module.FS.writeFile(name,uint8);
++            Module.FS.writeFile(name, uint8);
+ 
+-              return {ok:'ok'};
++            return { ok: 'ok' };
+ 
+-        }//uint8
++      }//uint8
+ 
+ 
+-        writefile.blob    = async function(name,blob,{Module}={}){
++      writefile.blob = async function (name, blob, { Module } = {}) {
+ 
+-              Module          ||= cur;
+-              if(!Module){
+-                    return {error:'no Module'};
+-              }
++            Module ||= cur;
++            if (!Module) {
++                  return { error: 'no Module' };
++            }
+ 
+-              var uint8         = await to_uint8.blob(blob);
+-              var {ok,error}    = writefile.uint8(name,uint8,{Module});
+-              if(error){
+-                    return {error};
+-              }
+-              return {ok};
++            var uint8 = await to_uint8.blob(blob);
++            var { ok, error } = writefile.uint8(name, uint8, { Module });
++            if (error) {
++                  return { error };
++            }
++            return { ok };
+ 
+-        }//blob
++      }//blob
+ 
+ 
+-        writefile.txt   = function(name,txt,{Module}={}){
++      writefile.txt = function (name, txt, { Module } = {}) {
+ 
+-              Module          ||= cur;
+-              if(!Module){
+-                    return {error:'no Module'};
+-              }
++            Module ||= cur;
++            if (!Module) {
++                  return { error: 'no Module' };
++            }
+ 
+-              var buf           = new TextEncoder().encode(txt);
+-              var uint8         = new Uint8Array(buf);
+-              var {ok,error}    = writefile.uint8(name,uint8,{Module});
+-              if(error){
+-                    return {error};
+-              }
+-              return {ok};
++            var buf = new TextEncoder().encode(txt);
++            var uint8 = new Uint8Array(buf);
++            var { ok, error } = writefile.uint8(name, uint8, { Module });
++            if (error) {
++                  return { error };
++            }
++            return { ok };
+ 
+-        }//txt
++      }//txt
+ 
+ 
+-        writefile.config    = function(name,config,{Module}={}){
++      writefile.config = function (name, config, { Module } = {}) {
+ 
+-              Module          ||= cur;
+-              if(!Module){
+-                    return {error:'no Module'};
+-              }
++            Module ||= cur;
++            if (!Module) {
++                  return { error: 'no Module' };
++            }
+ 
+-              var ini           = config_ini(config);
+-              var buf           = new TextEncoder().encode(ini);
+-              var uint8         = new Uint8Array(buf);
+-              var {ok,error}    = writefile.uint8(name,uint8,{Module});
+-              if(error){
+-                    return {error};
+-              }
+-              return {ok};
++            var ini = config_ini(config);
++            var buf = new TextEncoder().encode(ini);
++            var uint8 = new Uint8Array(buf);
++            var { ok, error } = writefile.uint8(name, uint8, { Module });
++            if (error) {
++                  return { error };
++            }
++            return { ok };
+ 
+-        }//config
++      }//config
+ 
+ 
+-        obj.download    = download;
++      obj.download = download;
+ 
+-        function download(v,{type,name}={}){
++      function download(v, { type, name } = {}) {
+ 
+-              var blob      = new Blob([v],{type});
+-              download_blob(blob,name);
++            var blob = new Blob([v], { type });
++            download_blob(blob, name);
+ 
+-        }//download
++      }//download
+ 
+ 
+-        obj.download.file   = function(path,{type}={}){
++      obj.download.file = function (path, { type } = {}) {
+ 
+-              var {uint8,error}   = readfile(path);
+-              if(error){
+-                    return {error};
+-              }
+-              download(uint8,{type,name:path});
++            var { uint8, error } = readfile(path);
++            if (error) {
++                  return { error };
++            }
++            download(uint8, { type, name: path });
+ 
+-        }//file
++      }//file
+ 
+ 
+-        obj.download.blob   = download_blob;
++      obj.download.blob = download_blob;
+ 
+-        function download_blob(blob,name){
++      function download_blob(blob, name) {
+ 
+-              var url       = window.URL.createObjectURL(blob);
+-              var a         = document.createElement('a');
+-              a.href        = url;
+-              a.download    = name||blob.name||'';
+-              a.click();
++            var url = window.URL.createObjectURL(blob);
++            var a = document.createElement('a');
++            a.href = url;
++            a.download = name || blob.name || '';
++            a.click();
+ 
+-        }//blob
++      }//blob
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        fs.snapshot   = function({path='/',Module}={}){
+-                                                                                var df=false;
+-                                                                                df && console.log('fs.snapshot');
+-              Module        ||= cur;
+-              var snapshot    = {};
+-              var entries     = Module.FS.readdir(path);
++      fs.snapshot = function ({ path = '/', Module } = {}) {
++            var df = false;
++            df && console.log('fs.snapshot');
++            Module ||= cur;
++            var snapshot = {};
++            var entries = Module.FS.readdir(path);
+ 
+-              entries.forEach((entry) => {
++            entries.forEach((entry) => {
+ 
+-                    if(entry==='.'||entry==='..')return;
++                  if (entry === '.' || entry === '..') return;
+ 
+-                    var fullPath    = path+entry;
+-                                                                                df && console.log('fullpath',fullPath);
+-                    try{
++                  var fullPath = path + entry;
++                  df && console.log('fullpath', fullPath);
++                  try {
+ 
+-                          var stats   = Module.FS.stat(fullPath);
++                        var stats = Module.FS.stat(fullPath);
+ 
+-                          if(Module.FS.isFile(stats.mode)){
+-                                                                                df && console.log('fullpath',fullPath);
+-                                var uint8             = Module.FS.readFile(fullPath);
+-                                snapshot[fullPath]    = uint8;
+-                          }
+-                          if(Module.FS.isDir(stats.mode)){
+-                                                                                // recurse
+-                                var dir   = fs.snapshot({Module,path:fullPath+'/'});
+-                                Object.assign(snapshot,dir);
+-                          }
++                        if (Module.FS.isFile(stats.mode)) {
++                              df && console.log('fullpath', fullPath);
++                              var uint8 = Module.FS.readFile(fullPath);
++                              snapshot[fullPath] = uint8;
++                        }
++                        if (Module.FS.isDir(stats.mode)) {
++                              // recurse
++                              var dir = fs.snapshot({ Module, path: fullPath + '/' });
++                              Object.assign(snapshot, dir);
++                        }
+ 
+-                    }//try
+-                    catch(err){
+-                    }//catch
++                  }//try
++                  catch (err) {
++                  }//catch
+ 
+-              });
++            });
+ 
+-              return snapshot;
++            return snapshot;
+ 
+-        }//snapshot
++      }//snapshot
+ 
+ 
+ 
+ 
+-        fs.restore    = function({path='/',snapshot,Module}){
+-                                                                                var df=false;
+-                                                                                df && console.log('fs.restore');
+-              Module    ||= cur;
+-              var src     = path;
++      fs.restore = function ({ path = '/', snapshot, Module }) {
++            var df = false;
++            df && console.log('fs.restore');
++            Module ||= cur;
++            var src = path;
+ 
+-              Object.entries(snapshot).forEach(([path,content])=>{
++            Object.entries(snapshot).forEach(([path, content]) => {
+ 
+-                    var parts     = path.split('/').slice(1,-1);
+-                    var current   = src;
++                  var parts = path.split('/').slice(1, -1);
++                  var current = src;
+ 
+-                    parts.forEach((part) => {
++                  parts.forEach((part) => {
+ 
+-                          var next    = current+'/'+part;
+-                                                                                df && console.log('dir',next);
+-                          try{
++                        var next = current + '/' + part;
++                        df && console.log('dir', next);
++                        try {
+ 
+-                                Module.FS.mkdir(next);
++                              Module.FS.mkdir(next);
+ 
+-                          }//try
+-                          catch(err){
+-                                                                                // already exists
+-                          }//catch
++                        }//try
++                        catch (err) {
++                              // already exists
++                        }//catch
+ 
+-                          current   = next;
++                        current = next;
+ 
+-                    });
+-                                                                                df && console.log('file',path);
+-                    Module.FS.writeFile(path,content);
++                  });
++                  df && console.log('file', path);
++                  Module.FS.writeFile(path, content);
+ 
+-              });
++            });
+ 
+-        }//restore
++      }//restore
+ 
+ 
+-        fs.diff   = function(snap1,snap2){
++      fs.diff = function (snap1, snap2) {
+ 
+-              var k1        = [];
+-              if(snap1){
+-                    k1      = Object.keys(snap1);
+-              }
+-              var s1        = new Set(k1);
++            var k1 = [];
++            if (snap1) {
++                  k1 = Object.keys(snap1);
++            }
++            var s1 = new Set(k1);
+ 
+-              var k2        = [];
+-              if(snap2){
+-                    k2      = Object.keys(snap2);
+-              }
+-              var s2        = new Set(k2);
++            var k2 = [];
++            if (snap2) {
++                  k2 = Object.keys(snap2);
++            }
++            var s2 = new Set(k2);
+ 
+-              var d         = s2.difference(s1);
++            var d = s2.difference(s1);
+ 
+-              var result    = {};
+-              d.forEach(key=>result[key]=snap2[key]);
++            var result = {};
++            d.forEach(key => result[key] = snap2[key]);
+ 
+-              return result;
++            return result;
+ 
+-        }//diff
++      }//diff
+ 
+ 
+-        fs.save    = function(){
++      fs.save = function () {
+ 
+-              var snap    = fs.snapshot();
+-              snapshot    = snap;
+-              return snap;
++            var snap = fs.snapshot();
++            snapshot = snap;
++            return snap;
+ 
+-        }//save
++      }//save
+ 
+ 
+-        fs.set    = function(snap){
++      fs.set = function (snap) {
+ 
+-              snap      ||= fs.snapshot();
+-              initial     = snap;
+-              return snap;
++            snap ||= fs.snapshot();
++            initial = snap;
++            return snap;
+ 
+-        }//set
++      }//set
+ 
+ 
+-        fs.complete   = function(){
++      fs.complete = function () {
+ 
+-              var result    = fs.diff(initial,snapshot);
+-              return result;
++            var result = fs.diff(initial, snapshot);
++            return result;
+ 
+-        }//complete
++      }//complete
+ 
+ 
+-        fs.clear    = function(){
++      fs.clear = function () {
+ 
+-              //initial     = null;
+-              snapshot    = null;
++            //initial     = null;
++            snapshot = null;
+ 
+-        }//clear
++      }//clear
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.text.encode   = textencode;
++      obj.text.encode = textencode;
+ 
+-        function textencode(v){
++      function textencode(v) {
+ 
+-              var txt   = v;
+-              var buf   = textencoder.encode(txt);
+-              return buf;
++            var txt = v;
++            var buf = textencoder.encode(txt);
++            return buf;
+ 
+-        }//textencode
++      }//textencode
+ 
+ 
+-        obj.text.decode   = textdecode;
++      obj.text.decode = textdecode;
+ 
+-        function textdecode(v){
++      function textdecode(v) {
+ 
+-              var buf;
+-              var type    = datatype(v);
++            var buf;
++            var type = datatype(v);
+ 
+-              switch(type){
++            switch (type) {
+ 
+-                case 'uint8array'   : buf   = v.buffer;       break;
+-                default             : buf   = v;
++                  case 'uint8array': buf = v.buffer; break;
++                  default: buf = v;
+ 
+-              }//switch
++            }//switch
+ 
+-              var txt   = textdecoder.decode(buf);
+-              return txt;
++            var txt = textdecoder.decode(buf);
++            return txt;
+ 
+-        }//textdecode
++      }//textdecode
+ 
+ 
+ 
+-  //to_uint8:
++      //to_uint8:
+ 
+ 
+-        obj.to_uint8    = to_uint8;
++      obj.to_uint8 = to_uint8;
+ 
+-        async function to_uint8(v,type){
++      async function to_uint8(v, type) {
+ 
+-              var uint8;
+-              type    ||= datatype(v);
+-                                                                                //debug.log('to_uint8 : type',type);
+-              switch(type){
++            var uint8;
++            type ||= datatype(v);
++            //debug.log('to_uint8 : type',type);
++            switch (type) {
+ 
+-                case 'blob'             :
+-                                          uint8   = to_uint8.blob(v);
+-                                          break;
++                  case 'blob':
++                        uint8 = to_uint8.blob(v);
++                        break;
+ 
+-                case 'uint8array'       :
+-                                          uint8   = v;
+-                                          break;
++                  case 'uint8array':
++                        uint8 = v;
++                        break;
+ 
+-                case 'string'           :
+-                                          uint8   = to_uint8.string(v);
+-                                          break;
++                  case 'string':
++                        uint8 = to_uint8.string(v);
++                        break;
+ 
+-                case 'bin'              :
+-                                          uint8   = to_uint8.bin(v);
+-                                          break;
++                  case 'bin':
++                        uint8 = to_uint8.bin(v);
++                        break;
+ 
+-                case 'arraybuffer'      :
+-                                          uint8   = to_uint8.arraybuffer(v);
+-                                          break;
++                  case 'arraybuffer':
++                        uint8 = to_uint8.arraybuffer(v);
++                        break;
+ 
+-              }//switch
++            }//switch
+ 
+-              return uint8;
++            return uint8;
+ 
+-        }//to_uint8
++      }//to_uint8
+ 
+ 
+-        to_uint8.blob   = async function(blob){
++      to_uint8.blob = async function (blob) {
+ 
+-              var buf     = await blob.arrayBuffer();
+-              var uint8   = new Uint8Array(buf);
+-              return uint8;
++            var buf = await blob.arrayBuffer();
++            var uint8 = new Uint8Array(buf);
++            return uint8;
+ 
+-        }//blob
++      }//blob
+ 
+ 
+-        to_uint8.bin   = function(str){
++      to_uint8.bin = function (str) {
+ 
+-              var n       = str.length;
+-              var uint8   = new Uint8Array(n);
++            var n = str.length;
++            var uint8 = new Uint8Array(n);
+ 
+-              for(var i=0;i<n;i++){
++            for (var i = 0; i < n; i++) {
+ 
+-                    var c       = str[i];
+-                    var byte    = c.charCodeAt(0);
+-                    uint8[i]    = byte;
++                  var c = str[i];
++                  var byte = c.charCodeAt(0);
++                  uint8[i] = byte;
+ 
+-              }//string
++            }//string
+ 
+-              return uint8;
++            return uint8;
+ 
+-        }//string
++      }//string
+ 
+ 
+-        to_uint8.string   = function(str){
++      to_uint8.string = function (str) {
+ 
+-              var uint8   = textencode(str);
+-              return uint8;
++            var uint8 = textencode(str);
++            return uint8;
+ 
+-        }//string
++      }//string
+ 
+ 
+-  //from_uint8:
++      //from_uint8:
+ 
+-        obj.from_uint8    = from_uint8;
++      obj.from_uint8 = from_uint8;
+ 
+-        function from_uint8(uint8,type='string'){
++      function from_uint8(uint8, type = 'string') {
+ 
+-              switch(type){
++            switch (type) {
+ 
+-                case 'blob'     :
+-                                  var blob    = from_uint8.blob(uint8);
+-                                  return blob;
++                  case 'blob':
++                        var blob = from_uint8.blob(uint8);
++                        return blob;
+ 
+-                case 'string'   :
+-                                  var str   = from_uint8.string(uint8);
+-                                  return str;
++                  case 'string':
++                        var str = from_uint8.string(uint8);
++                        return str;
+ 
+-              }//switch
++            }//switch
+ 
+-        }//from_uint8
++      }//from_uint8
+ 
+ 
+-        from_uint8.blob   = function(uint8){
++      from_uint8.blob = function (uint8) {
+ 
+-              var blob    = new Blob([uint8]);
+-              return blob;
++            var blob = new Blob([uint8]);
++            return blob;
+ 
+-        }//blob
++      }//blob
+ 
+ 
+-        from_uint8.bin   = function(uint8){
++      from_uint8.bin = function (uint8) {
+ 
+-              var str   = '';
+-              var n     = uint8.length;
+-              for(var i=0;i<n;i++){
++            var str = '';
++            var n = uint8.length;
++            for (var i = 0; i < n; i++) {
+ 
+-                    var byte    = uint8[i];
+-                    var c       = String.fromCharCode(byte);
+-                    str        += c;
++                  var byte = uint8[i];
++                  var c = String.fromCharCode(byte);
++                  str += c;
+ 
+-              }//for
++            }//for
+ 
+-              return str;
++            return str;
+ 
+-        }//string
++      }//string
+ 
+ 
+-        from_uint8.string   = function(uint8){
++      from_uint8.string = function (uint8) {
+ 
+-              var txt   = textdecode(uint8);
+-              return txt;
++            var txt = textdecode(uint8);
++            return txt;
+ 
+-        }//string
++      }//string
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.to_hex   = to_hex;
++      obj.to_hex = to_hex;
+ 
+-        function to_hex(uint8){
++      function to_hex(uint8) {
+ 
+-              var hex   = [...uint8].map(x=>x.toString(16).padStart(2,'0')).join('');
+-              return hex;
++            var hex = [...uint8].map(x => x.toString(16).padStart(2, '0')).join('');
++            return hex;
+ 
+-        }//hex
++      }//hex
+ 
+ 
+-        obj.from_hex   = from_hex;
++      obj.from_hex = from_hex;
+ 
+-        function from_hex(hex){
++      function from_hex(hex) {
+ 
+-              var len     = hex.length/2;
+-              var uint8   = new Uint8Array(len);
++            var len = hex.length / 2;
++            var uint8 = new Uint8Array(len);
+ 
+-              for(var i=0;i<len;i++){
++            for (var i = 0; i < len; i++) {
+ 
+-                    var h       = hex.substr(i*2,2);
+-                    uint8[i]    = parseInt(h,16);
++                  var h = hex.substr(i * 2, 2);
++                  uint8[i] = parseInt(h, 16);
+ 
+-              }//for
++            }//for
+ 
+-              return uint8;
++            return uint8;
+ 
+-        }//hex
++      }//hex
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.to_blob   = to_blob;
++      obj.to_blob = to_blob;
+ 
+-        function to_blob(v,type){
++      function to_blob(v, type) {
+ 
+-              var blob;
+-              type    ||= datatype(v);
+-                                                                                //console.log('type',type);
+-              switch(type){
++            var blob;
++            type ||= datatype(v);
++            //console.log('type',type);
++            switch (type) {
+ 
+-                case 'string'         : blob    = to_blob.string(v);            break;
+-                case 'blob'           : blob    = v;                            break;
+-                case 'uint8array'     : blob    = to_blob.uint8(v);             break;
+-                case 'arraybuffer'    : blob    = to_blob.arraybuffer(v);       break;
+-                default               : blob    = to_blob.def(v);
++                  case 'string': blob = to_blob.string(v); break;
++                  case 'blob': blob = v; break;
++                  case 'uint8array': blob = to_blob.uint8(v); break;
++                  case 'arraybuffer': blob = to_blob.arraybuffer(v); break;
++                  default: blob = to_blob.def(v);
+ 
+-              }//switch
++            }//switch
+ 
+-              return blob;
++            return blob;
+ 
+-        }//to_blob
++      }//to_blob
+ 
+ 
+-        to_blob.def   = function(v){
++      to_blob.def = function (v) {
+ 
+-              var blob    = new Blob([v]);
+-              return blob;
++            var blob = new Blob([v]);
++            return blob;
+ 
+-        }//def
++      }//def
+ 
+ 
+-        to_blob.uint8   = function(uint8){
++      to_blob.uint8 = function (uint8) {
+ 
+-              var blob    = new Blob([uint8]);
+-              return blob;
++            var blob = new Blob([uint8]);
++            return blob;
+ 
+-        }//uint8
++      }//uint8
+ 
+ 
+-        to_blob.string    = function(str){
++      to_blob.string = function (str) {
+ 
+-              var blob    = new Blob([str]);
+-              return blob;
++            var blob = new Blob([str]);
++            return blob;
+ 
+-        }//to_blob
++      }//to_blob
+ 
+ 
+-        obj.from_blob   = from_blob;
++      obj.from_blob = from_blob;
+ 
+-        async function from_blob(blob,type='uint8'){
++      async function from_blob(blob, type = 'uint8') {
+ 
+-              switch(type){
++            switch (type) {
+ 
+-                case 'string'   : var txt   = await from_blob.string(blob);
+-                                  return txt;
++                  case 'string': var txt = await from_blob.string(blob);
++                        return txt;
+ 
+-                case 'uint8'    : var uint8   = await from_blob.uint8(blob);
+-                                  return uint8;
++                  case 'uint8': var uint8 = await from_blob.uint8(blob);
++                        return uint8;
+ 
+-              }//switch
++            }//switch
+ 
+-        }//from_blob
++      }//from_blob
+ 
+ 
+-        from_blob.string    = async function(blob){
++      from_blob.string = async function (blob) {
+ 
+-              var txt   = await blob.text();
+-              return txt;
++            var txt = await blob.text();
++            return txt;
+ 
+-        }//string
++      }//string
+ 
+ 
+-        from_blob.uint8   = async function(blob){
++      from_blob.uint8 = async function (blob) {
+ 
+-              var buf     = await blob.arrayBuffer();
+-              var uint8   = new Uint8Array(buf);
+-              return uint8;
++            var buf = await blob.arrayBuffer();
++            var uint8 = new Uint8Array(buf);
++            return uint8;
+ 
+-        }//uint8
++      }//uint8
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.to_b64    = to_b64;
++      obj.to_b64 = to_b64;
+ 
+-        function to_b64(v,type){
++      function to_b64(v, type) {
+ 
+-              var b64;
+-              type    ||= datatype(v);
++            var b64;
++            type ||= datatype(v);
+ 
+-              switch(type){
++            switch (type) {
+ 
+-                case 'uint8'        :
+-                case 'uint8array'   : b64   = to_b64.uint8(v);
++                  case 'uint8':
++                  case 'uint8array': b64 = to_b64.uint8(v);
+ 
+-              }//switch
++            }//switch
+ 
+-              return b64;
++            return b64;
+ 
+-        }//to_b64
++      }//to_b64
+ 
+ 
+-        to_b64.uint8    = function(uint8){
++      to_b64.uint8 = function (uint8) {
+ 
+-              var bin   = '';
+-              var n     = uint8.length;
++            var bin = '';
++            var n = uint8.length;
+ 
+-              for(var i=0;i<n;i++){
++            for (var i = 0; i < n; i++) {
+ 
+-                    var byte    = uint8[i];
+-                    var c       = String.fromCharCode(byte);
+-                    bin        += c;
++                  var byte = uint8[i];
++                  var c = String.fromCharCode(byte);
++                  bin += c;
+ 
+-              }//for
++            }//for
+ 
+-              var b64   = btoa(bin);
+-              return b64;
++            var b64 = btoa(bin);
++            return b64;
+ 
+-        }//uint8
++      }//uint8
+ 
+ 
+-        obj.from_b64    = from_b64;
++      obj.from_b64 = from_b64;
+ 
+-        function from_b64(b64,type='uint8'){
++      function from_b64(b64, type = 'uint8') {
+ 
+-              switch(type){
++            switch (type) {
+ 
+-                case 'uint8array'     :
+-                case 'uint8'          : var uint8   = from_b64.uint8(b64);
+-                                        return uint8;
++                  case 'uint8array':
++                  case 'uint8': var uint8 = from_b64.uint8(b64);
++                        return uint8;
+ 
+-              }//switch
++            }//switch
+ 
+-        }//from_b64
++      }//from_b64
+ 
+ 
+-        from_b64.uint8    = function(b64){
++      from_b64.uint8 = function (b64) {
+ 
+-              var bin     = atob(b64);
+-              var n       = bin.length;
+-              var uint8   = new Uint8Array(n);
++            var bin = atob(b64);
++            var n = bin.length;
++            var uint8 = new Uint8Array(n);
+ 
+-              for(var i=0;i<n;i++){
++            for (var i = 0; i < n; i++) {
+ 
+-                    var c       = bin[i];
+-                    var byte    = c.charCodeAt(0);
+-                    uint8[i]    = byte;
++                  var c = bin[i];
++                  var byte = c.charCodeAt(0);
++                  uint8[i] = byte;
+ 
+-              }//for
++            }//for
+ 
+-              return uint8;
++            return uint8;
+ 
+-        }//uint8
++      }//uint8
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.normalise_pem   = normalise_pem;
+-        obj.norm_pem        = normalise_pem;
++      obj.normalise_pem = normalise_pem;
++      obj.norm_pem = normalise_pem;
+ 
+-        function normalise_pem(pem){
++      function normalise_pem(pem) {
+ 
+-              pem         = pem.replace(/\r/g,'');
+-              var lines   = pem.split('\n');
++            pem = pem.replace(/\r/g, '');
++            var lines = pem.split('\n');
+ 
+-              var n       = lines.length;
+-              for(var i=1;i<n-1;i++){
++            var n = lines.length;
++            for (var i = 1; i < n - 1; i++) {
+ 
+-                    var line    = lines[i];
+-                    line        = line.trimStart();
+-                    lines[i]    = line;
++                  var line = lines[i];
++                  line = line.trimStart();
++                  lines[i] = line;
+ 
+-              }//for
++            }//for
+ 
+-              pem   = lines.join('\n').trim();
+-              return pem;
++            pem = lines.join('\n').trim();
++            return pem;
+ 
+-        }//normalise_pem
++      }//normalise_pem
+ 
+ 
+-        obj.datatype    = datatype;
++      obj.datatype = datatype;
+ 
+-        function datatype(v,log_flag){
++      function datatype(v, log_flag) {
+ 
+-              var str   = Object.prototype.toString.call(v);
+-              str       = str.slice(8,-1);
+-              str       = str.toLowerCase();
++            var str = Object.prototype.toString.call(v);
++            str = str.slice(8, -1);
++            str = str.toLowerCase();
+ 
+-              if(log_flag===true){
+-                    log(str);
+-              }else{
+-                    if(log_flag){
+-                          if(typeof stdout=='function'){
+-                                stdout(str);
+-                          }
+-                          if(echo){
+-                                log(str);
+-                          }
+-                    }
+-              }
++            if (log_flag === true) {
++                  log(str);
++            } else {
++                  if (log_flag) {
++                        if (typeof stdout == 'function') {
++                              stdout(str);
++                        }
++                        if (echo) {
++                              log(str);
++                        }
++                  }
++            }
+ 
+-              return str;
++            return str;
+ 
+-        }//datatype
++      }//datatype
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.rndbytes    = rndbytes;
++      obj.rndbytes = rndbytes;
+ 
+-        function rndbytes(n=32){
++      function rndbytes(n = 32) {
+ 
+-              var buf   = crypto.getRandomValues(new Uint8Array(n));
+-              return buf;
++            var buf = crypto.getRandomValues(new Uint8Array(n));
++            return buf;
+ 
+-        }//rndbytes
++      }//rndbytes
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.config   = function(type){
++      obj.config = function (type) {
+ 
+-              switch(type){
+-                case 'ca'               : config    = opensslmod.config.ca();                   break;
+-                case 'server'           : condig    = opensslmod.config.server();               break;
+-                case 'client'           : config    = opensslmod.config.client();               break;
+-                case 'codeSigning'      : config    = opensslmod.config.codeSigning();          break;
+-                case 'email'            : config    = opensslmod.config.email();                break;
+-                case 'ocspResponder'    : config    = opensslmod.config.ocspResponder();        break;
+-                case 'timestmap'        : config    = opensslmod.config.timestamp();            break;
+-                case 'ipsec'            : config    = opensslmod.config.ipsec();                break;
+-                case 'device'           : config    = opensslmod.condig.device();               break;
++            switch (type) {
++                  case 'ca': config = opensslmod.config.ca(); break;
++                  case 'server': condig = opensslmod.config.server(); break;
++                  case 'client': config = opensslmod.config.client(); break;
++                  case 'codeSigning': config = opensslmod.config.codeSigning(); break;
++                  case 'email': config = opensslmod.config.email(); break;
++                  case 'ocspResponder': config = opensslmod.config.ocspResponder(); break;
++                  case 'timestmap': config = opensslmod.config.timestamp(); break;
++                  case 'ipsec': config = opensslmod.config.ipsec(); break;
++                  case 'device': config = opensslmod.condig.device(); break;
+ 
+-                default                 : config    = obj.config.default();                     break;
+-              }
++                  default: config = obj.config.default(); break;
++            }
+ 
+-                                                                                console.log(JSON.stringify(config,null,4));
+-              return config;
++            console.log(JSON.stringify(config, null, 4));
++            return config;
+ 
+-        }//config
++      }//config
+ 
+ 
+-        for(var key in opensslmod.config){
++      for (var key in opensslmod.config) {
+ 
+-              obj.config[key]   = opensslmod.config[key];
++            obj.config[key] = opensslmod.config[key];
+ 
+-        }//for
++      }//for
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        obj.log   = log;
++      obj.log = log;
+ 
+-        function log(){
++      function log() {
+ 
+-              console.log.apply(console,arguments);
+-              if(echo){
+-                    if(typeof stdout=='function'){
+-                          var str   = [...arguments].map(v=>v.toString()).join(' ');
+-                          stdout(str);
+-                    }
+-              }
++            console.log.apply(console, arguments);
++            if (echo) {
++                  if (typeof stdout == 'function') {
++                        var str = [...arguments].map(v => v.toString()).join(' ');
++                        stdout(str);
++                  }
++            }
+ 
+-        }//log
++      }//log
+ 
+ 
+-        log.json    = function(v){
++      log.json = function (v) {
+ 
+-              var str   = JSON.stringify(v,null,4);
+-              console.log(str);
++            var str = JSON.stringify(v, null, 4);
++            console.log(str);
+ 
+-        }//json
++      }//json
+ 
+ 
+-        log.hex   = function(v){
++      log.hex = function (v) {
+ 
+-              var uint8   = v;
+-              var hex     = [...uint8].map(x=>x.toString(16).padStart(2,'0')).join(' ');
+-              console.log(hex);
++            var uint8 = v;
++            var hex = [...uint8].map(x => x.toString(16).padStart(2, '0')).join(' ');
++            console.log(hex);
+ 
+-        }//hex
++      }//hex
+ 
+ 
+-  //:
++      //:
+ 
+ 
+-        function debug(...args){
++      function debug(...args) {
+ 
+-              if(!df && !obj.df && !opensslmod.df)return;
+-              args.unshift(`[ ${did} ]`);
+-              var fmt     = Array.from({length:args.length}).fill('%O').join(' ');
+-              var args2   = [fmt].concat(args);
+-              if(platform=='browser'){
+-                    console.groupCollapsed.apply(console,args2);
+-                    console.trace();
+-                    console.groupEnd();
+-              }else{
+-                    console.log.apply(console,args2);
+-              }
++            if (!df && !obj.df && !opensslmod.df) return;
++            args.unshift(`[ ${did} ]`);
++            var fmt = Array.from({ length: args.length }).fill('%O').join(' ');
++            var args2 = [fmt].concat(args);
++            if (platform == 'browser') {
++                  console.groupCollapsed.apply(console, args2);
++                  console.trace();
++                  console.groupEnd();
++            } else {
++                  console.log.apply(console, args2);
++            }
+ 
+-        }//debug
++      }//debug
+ 
+ 
+-        debug.log   = function(){debug.apply(null,arguments)}
++      debug.log = function () { debug.apply(null, arguments) }
+ 
+ 
+-        debug.json    = function(v){
++      debug.json = function (v) {
+ 
+-              var err;
+-              try{
++            var err;
++            try {
+ 
+-                    var str   = JSON.stringify(v,null,4);
++                  var str = JSON.stringify(v, null, 4);
+ 
+-              }//try
+-              catch(err2){
++            }//try
++            catch (err2) {
+ 
+-                    err   = err2;
++                  err = err2;
+ 
+-              }//catch
+-              if(err){
+-                    var error   = err.toString();
+-                    debug(error);
+-              }else{
+-                    debug(str);
+-              }
++            }//catch
++            if (err) {
++                  var error = err.toString();
++                  debug(error);
++            } else {
++                  debug(str);
++            }
+ 
+-        }//json
++      }//json
+ 
+ 
+-  return obj;
++      return obj;
+ 
+-//openssl
++      //openssl
+ }
+ 
+ 
+ 
+-        opensslmod.config.default    = function(){
+-        
+-              var config    = {
+-              
+-                    dn  : {
+-                                CN    : 'example.com',
+-                                O     : 'Example Ltd',
+-                                OU    : 'IT',
+-                                L     : 'London',
+-                                ST    : 'England',
+-                                C     : 'GB',
+-                    },
+-                    
+-                    ext : {
+-                                san   : {
+-                                              dns : ['example.com','*.example.com'],
+-                                              ip  : ['192.168.1.10','10.0.0.5','2001:db8::1']
+-                                        },
++opensslmod.config.default = function () {
+ 
+-                                keyUsage            : ['digitalSignature','keyEncipherment'],
+-                                keyUsageCritical    : true,
+-                                
+-                                extendedKeyUsage            : ['serverAuth'],
+-                                extendedKeyUsageCritical    : true,
+-                                
+-                                basicConstraints    : {ca:false,critical:true,pathlen:0},
+-                                nameConstraints     : {
+-                                                            permitted:{dns:['www.example.com','example.com']},
+-                                                            excluded:{dns:['.malicious.com','malicious.com']}
+-                                                      }
+-                    }
++      var config = {
+ 
+-              };
+-              return config;
++            dn: {
++                  CN: 'example.com',
++                  O: 'Example Ltd',
++                  OU: 'IT',
++                  L: 'London',
++                  ST: 'England',
++                  C: 'GB',
++            },
+ 
+-        }//default
++            ext: {
++                  san: {
++                        dns: ['example.com', '*.example.com'],
++                        ip: ['192.168.1.10', '10.0.0.5', '2001:db8::1']
++                  },
+ 
++                  keyUsage: ['digitalSignature', 'keyEncipherment'],
++                  keyUsageCritical: true,
++
++                  extendedKeyUsage: ['serverAuth'],
++                  extendedKeyUsageCritical: true,
++
++                  basicConstraints: { ca: false, critical: true, pathlen: 0 },
++                  nameConstraints: {
++                        permitted: { dns: ['www.example.com', 'example.com'] },
++                        excluded: { dns: ['.malicious.com', 'malicious.com'] }
++                  }
++            }
+ 
+-        opensslmod.config.ca   = function(){
++      };
++      return config;
+ 
+-              var config    = {
+-                    dn  : {
+-                                CN  : 'Example Intermediate CA',
+-                                O   :  'Example Ltd',
+-                                OU  : 'IT',
+-                                L   :  'London',
+-                                ST  : 'England',
+-                                C   :  'GB'
+-                          },
++}//default
+ 
+-                    ext : {
+-                                basicConstraints    : {ca:true,pathlen:0,critical:true},
+-                                keyUsage            : ['keyCertSign','cRLSign'],
+-                                keyUsageCritical    : true,
+-                                                                                      // Intermediates usually have NO EKU
+-                                // extendedKeyUsage: [],
+-                                                                                      // Intermediates usually have NO SAN
+-                                // san: null,
+ 
+-                                subjectKeyIdentifier      : 'hash',
+-                                authorityKeyIdentifier    : 'keyid:always',
++opensslmod.config.ca = function () {
+ 
+-                                nameConstraints : {
+-                                                        permitted: {dns:['.example.com','example.com']},
+-                                                        excluded: {dns:['malicious.com','.malicious.com']},
+-                                                  }
+-                          }
+-              };
+-              return config;
++      var config = {
++            dn: {
++                  CN: 'Example Intermediate CA',
++                  O: 'Example Ltd',
++                  OU: 'IT',
++                  L: 'London',
++                  ST: 'England',
++                  C: 'GB'
++            },
+ 
+-        }//ca
++            ext: {
++                  basicConstraints: { ca: true, pathlen: 0, critical: true },
++                  keyUsage: ['keyCertSign', 'cRLSign'],
++                  keyUsageCritical: true,
++                  // Intermediates usually have NO EKU
++                  // extendedKeyUsage: [],
++                  // Intermediates usually have NO SAN
++                  // san: null,
+ 
++                  subjectKeyIdentifier: 'hash',
++                  authorityKeyIdentifier: 'keyid:always',
+ 
+-        opensslmod.config.server   = function(){
++                  nameConstraints: {
++                        permitted: { dns: ['.example.com', 'example.com'] },
++                        excluded: { dns: ['malicious.com', '.malicious.com'] },
++                  }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {
+-                                          CN  : 'example.com',
+-                                          O   :  'Example Ltd',
+-                                          OU  : 'IT',
+-                                          L   :  'London',
+-                                          ST  : 'England',
+-                                          C   :  'GB'
+-                                    },
++}//ca
+ 
+-                                    ext : {
+-                                          san : {
+-                                                dns   : ['example.com','www.example.com','*.example.com'],
+-                                                ip    : ['192.168.1.10','10.0.0.5','2001:db8::1']
+-                                          },
+ 
+-                                          keyUsage            : ['digitalSignature','keyEncipherment'],
+-                                          keyUsageCritical    : true,
++opensslmod.config.server = function () {
+ 
+-                                          extendedKeyUsage            : ['serverAuth'],
+-                                          extendedKeyUsageCritical    : true,
++      var config = {
++            dn: {
++                  CN: 'example.com',
++                  O: 'Example Ltd',
++                  OU: 'IT',
++                  L: 'London',
++                  ST: 'England',
++                  C: 'GB'
++            },
+ 
+-                                          basicConstraints    : {ca:false,critical:true}
+-                                    }
+-                              };
+-              return config;
++            ext: {
++                  san: {
++                        dns: ['example.com', 'www.example.com', '*.example.com'],
++                        ip: ['192.168.1.10', '10.0.0.5', '2001:db8::1']
++                  },
+ 
+-        }//server
++                  keyUsage: ['digitalSignature', 'keyEncipherment'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['serverAuth'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.client   = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {
+-                                                CN    : 'matthew@example.com',
+-                                                O     : 'Example Ltd',
+-                                                OU    : 'Users',
+-                                                L     : 'London',
+-                                                ST    : 'England',
+-                                                C     : 'GB'
+-                                          },
++}//server
+ 
+-                                    ext : {
+-                                                san: {
+-                                                      email   : ['matthew@example.com'],
+-                                                      dns     : ['matthew.example.com']
+-                                                },
+ 
+-                                                keyUsage            : ['digitalSignature'],
+-                                                keyUsageCritical    : true,
++opensslmod.config.client = function () {
+ 
+-                                                extendedKeyUsage            : ['clientAuth'],
+-                                                extendedKeyUsageCritical    : true,
++      var config = {
++            dn: {
++                  CN: 'matthew@example.com',
++                  O: 'Example Ltd',
++                  OU: 'Users',
++                  L: 'London',
++                  ST: 'England',
++                  C: 'GB'
++            },
+ 
+-                                                basicConstraints    : {ca:false,critical:true}
+-                                          }
+-                              };
+-              return config;
++            ext: {
++                  san: {
++                        email: ['matthew@example.com'],
++                        dns: ['matthew.example.com']
++                  },
+ 
+-        }//client
++                  keyUsage: ['digitalSignature'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['clientAuth'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.codeSigning    = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {CN:'Example Code Signing',O:'Example Ltd',C:'GB'},
++}//client
+ 
+-                                    ext : {
+-                                                keyUsage          : ['digitalSignature'],
+-                                                keyUsageCritical  : true,
+ 
+-                                                extendedKeyUsage          : ['codeSigning'],
+-                                                extendedKeyUsageCritical  : true,
++opensslmod.config.codeSigning = function () {
+ 
+-                                                basicConstraints  : {ca:false,critical:true}
+-                                          }
+-                              };
+-              return config;
++      var config = {
++            dn: { CN: 'Example Code Signing', O: 'Example Ltd', C: 'GB' },
+ 
+-        }//codeSigning
++            ext: {
++                  keyUsage: ['digitalSignature'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['codeSigning'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.email    = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {CN:'Matthew',emailAddress:'matthew@example.com'},
++}//codeSigning
+ 
+-                                    ext : {
+-                                                san : {email:['matthew@example.com']},
+ 
+-                                                keyUsage          : ['digitalSignature','keyEncipherment'],
+-                                                keyUsageCritical  : true,
++opensslmod.config.email = function () {
+ 
+-                                                extendedKeyUsage          : ['emailProtection'],
+-                                                extendedKeyUsageCritical  : true,
++      var config = {
++            dn: { CN: 'Matthew', emailAddress: 'matthew@example.com' },
+ 
+-                                                basicConstraints  : {ca:false,critical:true}
+-                                          }
+-                              };
+-              return config;
++            ext: {
++                  san: { email: ['matthew@example.com'] },
+ 
+-        }//email
++                  keyUsage: ['digitalSignature', 'keyEncipherment'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['emailProtection'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.ocspResponder    = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {CN:'Example OCSP Responder',O:'Example Ltd',C:'GB'},
++}//email
+ 
+-                                    ext : {
+-                                                keyUsage          : ['digitalSignature'],
+-                                                keyUsageCritical  : true,
+ 
+-                                                extendedKeyUsage          : ['OCSPSigning'],
+-                                                extendedKeyUsageCritical  : true,
++opensslmod.config.ocspResponder = function () {
+ 
+-                                                basicConstraints  : {ca:false,critical:true}
+-                                          }
+-                              };
+-              return config;
++      var config = {
++            dn: { CN: 'Example OCSP Responder', O: 'Example Ltd', C: 'GB' },
+ 
+-        }//ocspResponder
++            ext: {
++                  keyUsage: ['digitalSignature'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['OCSPSigning'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.timestamp   = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {CN:'Example TSA',O:'Example Ltd',C:'GB'},
++}//ocspResponder
+ 
+-                                    ext : {
+-                                                keyUsage          : ['digitalSignature'],
+-                                                keyUsageCritical  : true,
+ 
+-                                                extendedKeyUsage          : ['timeStamping'],
+-                                                extendedKeyUsageCritical  : true,
++opensslmod.config.timestamp = function () {
+ 
+-                                                basicConstraints  : {ca:false,critical:true}
+-                                          }
+-                              };
+-              return config;
++      var config = {
++            dn: { CN: 'Example TSA', O: 'Example Ltd', C: 'GB' },
+ 
+-        }//timestamp
++            ext: {
++                  keyUsage: ['digitalSignature'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['timeStamping'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.ipsec   = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {CN:'vpn-client-01',O:'Example Ltd',C:'GB'},
++}//timestamp
+ 
+-                                    ext : {
+-                                          san : {dns:['vpn-client-01.example.com']},
+ 
+-                                          keyUsage          : ['digitalSignature','keyEncipherment'],
+-                                          keyUsageCritical  : true,
++opensslmod.config.ipsec = function () {
+ 
+-                                          extendedKeyUsage          : ['clientAuth','ipsecIKE'],
+-                                          extendedKeyUsageCritical  : true,
++      var config = {
++            dn: { CN: 'vpn-client-01', O: 'Example Ltd', C: 'GB' },
+ 
+-                                          basicConstraints  : {ca:false,critical:true}
+-                                    }
+-                              };
+-              return config;
++            ext: {
++                  san: { dns: ['vpn-client-01.example.com'] },
+ 
+-        }//ipsec
++                  keyUsage: ['digitalSignature', 'keyEncipherment'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['clientAuth', 'ipsecIKE'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.config.device    = function(){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var config    = {
+-                                    dn  : {CN:'device-1234',O:'Example IoT',C:'GB'},
++}//ipsec
+ 
+-                                    ext : {
+-                                          san : {dns:['device-1234.iot.example.com']},
+ 
+-                                          keyUsage          : ['digitalSignature'],
+-                                          keyUsageCritical  : true,
++opensslmod.config.device = function () {
+ 
+-                                          extendedKeyUsage          : ['clientAuth'],
+-                                          extendedKeyUsageCritical  : true,
++      var config = {
++            dn: { CN: 'device-1234', O: 'Example IoT', C: 'GB' },
+ 
+-                                          basicConstraints  : {ca:false,critical:true}
+-                                    }
+-                              };
+-              return config;
++            ext: {
++                  san: { dns: ['device-1234.iot.example.com'] },
+ 
+-        }//device
++                  keyUsage: ['digitalSignature'],
++                  keyUsageCritical: true,
+ 
++                  extendedKeyUsage: ['clientAuth'],
++                  extendedKeyUsageCritical: true,
+ 
+-        opensslmod.md5    = function md5_uint8(v,hex=true){
++                  basicConstraints: { ca: false, critical: true }
++            }
++      };
++      return config;
+ 
+-              var type   = Object.prototype.toString.call(v).slice(8,-1).toLowerCase();
+-              var bytes;
+-              switch(type){
++}//device
+ 
+-                case 'string'       : bytes   = new TextEncoder().encode(v);        break;
+-                case 'uint8array'   : bytes   = v;                                  break;
+ 
+-              }//switch
++opensslmod.md5 = function md5_uint8(v, hex = true) {
+ 
+-              var length                = bytes.length;
+-              var n                     = ((length+8)>>6)+1;
+-              var buffer                = new Uint8Array(n*64);
+-              buffer.set(bytes);
++      var type = Object.prototype.toString.call(v).slice(8, -1).toLowerCase();
++      var bytes;
++      switch (type) {
+ 
+-              buffer[length]            = 0x80;
+-              var bitLen                = length*8;
+-              buffer[buffer.length-8]   = bitLen&0xff;
+-              buffer[buffer.length-7]   = (bitLen>>>8)&0xff;
+-              buffer[buffer.length-6]   = (bitLen>>>16)&0xff;
+-              buffer[buffer.length-5]   = (bitLen>>>24)&0xff;
++            case 'string': bytes = new TextEncoder().encode(v); break;
++            case 'uint8array': bytes = v; break;
+ 
++      }//switch
+ 
+-              var state   = [1732584193,-271733879,-1732584194,271733878];
++      var length = bytes.length;
++      var n = ((length + 8) >> 6) + 1;
++      var buffer = new Uint8Array(n * 64);
++      buffer.set(bytes);
+ 
+-              for(var i=0;i<buffer.length;i+=64){
++      buffer[length] = 0x80;
++      var bitLen = length * 8;
++      buffer[buffer.length - 8] = bitLen & 0xff;
++      buffer[buffer.length - 7] = (bitLen >>> 8) & 0xff;
++      buffer[buffer.length - 6] = (bitLen >>> 16) & 0xff;
++      buffer[buffer.length - 5] = (bitLen >>> 24) & 0xff;
+ 
+-                    md5cycle(state,md5blk_array(buffer,i));
+ 
+-              }//for
++      var state = [1732584193, -271733879, -1732584194, 271733878];
+ 
++      for (var i = 0; i < buffer.length; i += 64) {
+ 
+-              var out   = new Uint8Array(16);
++            md5cycle(state, md5blk_array(buffer, i));
+ 
+-              for(var i=0;i<4;i++){
++      }//for
+ 
+-                    out[i*4]      = state[i]&0xff;
+-                    out[i*4+1]    = (state[i]>>>8)&0xff;
+-                    out[i*4+2]    = (state[i]>>>16)&0xff;
+-                    out[i*4+3]    = (state[i]>>>24)&0xff;
+ 
+-              }//for
++      var out = new Uint8Array(16);
+ 
+-              if(hex){
+-                    out   = [...out].map(x=>x.toString(16).padStart(2,'0')).join('');
+-              }
+-              return out;
++      for (var i = 0; i < 4; i++) {
+ 
++            out[i * 4] = state[i] & 0xff;
++            out[i * 4 + 1] = (state[i] >>> 8) & 0xff;
++            out[i * 4 + 2] = (state[i] >>> 16) & 0xff;
++            out[i * 4 + 3] = (state[i] >>> 24) & 0xff;
+ 
+-              function md5cycle(x,k){
++      }//for
+ 
+-                    var a       = x[0];
+-                    var b       = x[1];
+-                    var c       = x[2];
+-                    var d       = x[3];
+-                    
+-                    a           = ff(a, b, c, d, k[0], 7, -680876936);
+-                    d           = ff(d, a, b, c, k[1], 12, -389564586);
+-                    c           = ff(c, d, a, b, k[2], 17, 606105819);
+-                    b           = ff(b, c, d, a, k[3], 22, -1044525330);
+-                    a           = ff(a, b, c, d, k[4], 7, -176418897);
+-                    d           = ff(d, a, b, c, k[5], 12, 1200080426);
+-                    c           = ff(c, d, a, b, k[6], 17, -1473231341);
+-                    b           = ff(b, c, d, a, k[7], 22, -45705983);
+-                    a           = ff(a, b, c, d, k[8], 7, 1770035416);
+-                    d           = ff(d, a, b, c, k[9], 12, -1958414417);
+-                    c           = ff(c, d, a, b, k[10], 17, -42063);
+-                    b           = ff(b, c, d, a, k[11], 22, -1990404162);
+-                    a           = ff(a, b, c, d, k[12], 7, 1804603682);
+-                    d           = ff(d, a, b, c, k[13], 12, -40341101);
+-                    c           = ff(c, d, a, b, k[14], 17, -1502002290);
+-                    b           = ff(b, c, d, a, k[15], 22, 1236535329);
+-                    
+-                    a           = gg(a, b, c, d, k[1], 5, -165796510);
+-                    d           = gg(d, a, b, c, k[6], 9, -1069501632);
+-                    c           = gg(c, d, a, b, k[11], 14, 643717713);
+-                    b           = gg(b, c, d, a, k[0], 20, -373897302);
+-                    a           = gg(a, b, c, d, k[5], 5, -701558691);
+-                    d           = gg(d, a, b, c, k[10], 9, 38016083);
+-                    c           = gg(c, d, a, b, k[15], 14, -660478335);
+-                    b           = gg(b, c, d, a, k[4], 20, -405537848);
+-                    a           = gg(a, b, c, d, k[9], 5, 568446438);
+-                    d           = gg(d, a, b, c, k[14], 9, -1019803690);
+-                    c           = gg(c, d, a, b, k[3], 14, -187363961);
+-                    b           = gg(b, c, d, a, k[8], 20, 1163531501);
+-                    a           = gg(a, b, c, d, k[13], 5, -1444681467);
+-                    d           = gg(d, a, b, c, k[2], 9, -51403784);
+-                    c           = gg(c, d, a, b, k[7], 14, 1735328473);
+-                    b           = gg(b, c, d, a, k[12], 20, -1926607734);
+-                    
+-                    a           = hh(a, b, c, d, k[5], 4, -378558);
+-                    d           = hh(d, a, b, c, k[8], 11, -2022574463);
+-                    c           = hh(c, d, a, b, k[11], 16, 1839030562);
+-                    b           = hh(b, c, d, a, k[14], 23, -35309556);
+-                    a           = hh(a, b, c, d, k[1], 4, -1530992060);
+-                    d           = hh(d, a, b, c, k[4], 11, 1272893353);
+-                    c           = hh(c, d, a, b, k[7], 16, -155497632);
+-                    b           = hh(b, c, d, a, k[10], 23, -1094730640);
+-                    a           = hh(a, b, c, d, k[13], 4, 681279174);
+-                    d           = hh(d, a, b, c, k[0], 11, -358537222);
+-                    c           = hh(c, d, a, b, k[3], 16, -722521979);
+-                    b           = hh(b, c, d, a, k[6], 23, 76029189);
+-                    a           = hh(a, b, c, d, k[9], 4, -640364487);
+-                    d           = hh(d, a, b, c, k[12], 11, -421815835);
+-                    c           = hh(c, d, a, b, k[15], 16, 530742520);
+-                    b           = hh(b, c, d, a, k[2], 23, -995338651);
+-                    
+-                    a           = ii(a,b,c,d,k[0],6,-198630844);
+-                    d           = ii(d,a,b,c,k[7],10,1126891415);
+-                    c           = ii(c,d,a,b,k[14],15,-1416354905);
+-                    b           = ii(b,c,d,a,k[5],21,-57434055);
+-                    a           = ii(a,b,c,d,k[12],6,1700485571);
+-                    d           = ii(d,a,b,c,k[3],10,-1894986606);
+-                    c           = ii(c,d,a,b,k[10],15,-1051523);
+-                    b           = ii(b,c,d,a,k[1],21,-2054922799);
+-                    a           = ii(a,b,c,d,k[8],6,1873313359);
+-                    d           = ii(d,a,b,c,k[15],10,-30611744);
+-                    c           = ii(c,d,a,b,k[6],15,-1560198380);
+-                    b           = ii(b,c,d,a,k[13],21,1309151649);
+-                    a           = ii(a,b,c,d,k[4],6,-145523070);
+-                    d           = ii(d,a,b,c,k[11],10,-1120210379);
+-                    c           = ii(c,d,a,b,k[2],15,718787259);
+-                    b           = ii(b,c,d,a,k[9],21,-343485551);
+-                    
+-                    x[0]        = (x[0]+a)|0;
+-                    x[1]        = (x[1]+b)|0;
+-                    x[2]        = (x[2]+c)|0;
+-                    x[3]        = (x[3]+d)|0;
+-                    
+-              }//md5cycle
++      if (hex) {
++            out = [...out].map(x => x.toString(16).padStart(2, '0')).join('');
++      }
++      return out;
++
++
++      function md5cycle(x, k) {
++
++            var a = x[0];
++            var b = x[1];
++            var c = x[2];
++            var d = x[3];
++
++            a = ff(a, b, c, d, k[0], 7, -680876936);
++            d = ff(d, a, b, c, k[1], 12, -389564586);
++            c = ff(c, d, a, b, k[2], 17, 606105819);
++            b = ff(b, c, d, a, k[3], 22, -1044525330);
++            a = ff(a, b, c, d, k[4], 7, -176418897);
++            d = ff(d, a, b, c, k[5], 12, 1200080426);
++            c = ff(c, d, a, b, k[6], 17, -1473231341);
++            b = ff(b, c, d, a, k[7], 22, -45705983);
++            a = ff(a, b, c, d, k[8], 7, 1770035416);
++            d = ff(d, a, b, c, k[9], 12, -1958414417);
++            c = ff(c, d, a, b, k[10], 17, -42063);
++            b = ff(b, c, d, a, k[11], 22, -1990404162);
++            a = ff(a, b, c, d, k[12], 7, 1804603682);
++            d = ff(d, a, b, c, k[13], 12, -40341101);
++            c = ff(c, d, a, b, k[14], 17, -1502002290);
++            b = ff(b, c, d, a, k[15], 22, 1236535329);
++
++            a = gg(a, b, c, d, k[1], 5, -165796510);
++            d = gg(d, a, b, c, k[6], 9, -1069501632);
++            c = gg(c, d, a, b, k[11], 14, 643717713);
++            b = gg(b, c, d, a, k[0], 20, -373897302);
++            a = gg(a, b, c, d, k[5], 5, -701558691);
++            d = gg(d, a, b, c, k[10], 9, 38016083);
++            c = gg(c, d, a, b, k[15], 14, -660478335);
++            b = gg(b, c, d, a, k[4], 20, -405537848);
++            a = gg(a, b, c, d, k[9], 5, 568446438);
++            d = gg(d, a, b, c, k[14], 9, -1019803690);
++            c = gg(c, d, a, b, k[3], 14, -187363961);
++            b = gg(b, c, d, a, k[8], 20, 1163531501);
++            a = gg(a, b, c, d, k[13], 5, -1444681467);
++            d = gg(d, a, b, c, k[2], 9, -51403784);
++            c = gg(c, d, a, b, k[7], 14, 1735328473);
++            b = gg(b, c, d, a, k[12], 20, -1926607734);
+ 
++            a = hh(a, b, c, d, k[5], 4, -378558);
++            d = hh(d, a, b, c, k[8], 11, -2022574463);
++            c = hh(c, d, a, b, k[11], 16, 1839030562);
++            b = hh(b, c, d, a, k[14], 23, -35309556);
++            a = hh(a, b, c, d, k[1], 4, -1530992060);
++            d = hh(d, a, b, c, k[4], 11, 1272893353);
++            c = hh(c, d, a, b, k[7], 16, -155497632);
++            b = hh(b, c, d, a, k[10], 23, -1094730640);
++            a = hh(a, b, c, d, k[13], 4, 681279174);
++            d = hh(d, a, b, c, k[0], 11, -358537222);
++            c = hh(c, d, a, b, k[3], 16, -722521979);
++            b = hh(b, c, d, a, k[6], 23, 76029189);
++            a = hh(a, b, c, d, k[9], 4, -640364487);
++            d = hh(d, a, b, c, k[12], 11, -421815835);
++            c = hh(c, d, a, b, k[15], 16, 530742520);
++            b = hh(b, c, d, a, k[2], 23, -995338651);
+ 
+-              function md5blk_array(bytes,offset){
++            a = ii(a, b, c, d, k[0], 6, -198630844);
++            d = ii(d, a, b, c, k[7], 10, 1126891415);
++            c = ii(c, d, a, b, k[14], 15, -1416354905);
++            b = ii(b, c, d, a, k[5], 21, -57434055);
++            a = ii(a, b, c, d, k[12], 6, 1700485571);
++            d = ii(d, a, b, c, k[3], 10, -1894986606);
++            c = ii(c, d, a, b, k[10], 15, -1051523);
++            b = ii(b, c, d, a, k[1], 21, -2054922799);
++            a = ii(a, b, c, d, k[8], 6, 1873313359);
++            d = ii(d, a, b, c, k[15], 10, -30611744);
++            c = ii(c, d, a, b, k[6], 15, -1560198380);
++            b = ii(b, c, d, a, k[13], 21, 1309151649);
++            a = ii(a, b, c, d, k[4], 6, -145523070);
++            d = ii(d, a, b, c, k[11], 10, -1120210379);
++            c = ii(c, d, a, b, k[2], 15, 718787259);
++            b = ii(b, c, d, a, k[9], 21, -343485551);
+ 
+-                    var blks    = new Array(16);
++            x[0] = (x[0] + a) | 0;
++            x[1] = (x[1] + b) | 0;
++            x[2] = (x[2] + c) | 0;
++            x[3] = (x[3] + d) | 0;
+ 
+-                    for(var i=0;i<64;i+=4){
++      }//md5cycle
+ 
+-                          var v1        = bytes[offset+i];
+-                          var v2        = bytes[offset+i+1]<<8;
+-                          var v3        = bytes[offset+i+2]<<16;
+-                          var v4        = bytes[offset+i+3]<<24;
+-                          blks[i>>2]    = v1|v2|v3|v4;
+ 
+-                    }//for
++      function md5blk_array(bytes, offset) {
+ 
+-                    return blks;
+-                    
+-              }//md5blk_array
++            var blks = new Array(16);
+ 
++            for (var i = 0; i < 64; i += 4) {
+ 
+-              function ff(a,b,c,d,x,s,t){
+-              
+-                    a       = a+((b&c)|(~b&d))+x+t;
+-                    var v   = ((a<<s)|(a>>>(32-s)))+b;
+-                    return v;
+-                    
+-              }//ff
++                  var v1 = bytes[offset + i];
++                  var v2 = bytes[offset + i + 1] << 8;
++                  var v3 = bytes[offset + i + 2] << 16;
++                  var v4 = bytes[offset + i + 3] << 24;
++                  blks[i >> 2] = v1 | v2 | v3 | v4;
+ 
++            }//for
+ 
+-              function gg(a, b, c, d, x, s, t) {
++            return blks;
+ 
+-                    a = a + ((b & d) | (c & ~d)) + x + t;
+-                    return ((a << s) | (a >>> (32 - s))) + b;
++      }//md5blk_array
++
++
++      function ff(a, b, c, d, x, s, t) {
++
++            a = a + ((b & c) | (~b & d)) + x + t;
++            var v = ((a << s) | (a >>> (32 - s))) + b;
++            return v;
++
++      }//ff
++
++
++      function gg(a, b, c, d, x, s, t) {
+ 
+-              }//gg
++            a = a + ((b & d) | (c & ~d)) + x + t;
++            return ((a << s) | (a >>> (32 - s))) + b;
+ 
++      }//gg
+ 
+-              function hh(a, b, c, d, x, s, t) {
+ 
+-                    a = a + (b ^ c ^ d) + x + t;
+-                    return ((a << s) | (a >>> (32 - s))) + b;
++      function hh(a, b, c, d, x, s, t) {
+ 
+-              }//hh
++            a = a + (b ^ c ^ d) + x + t;
++            return ((a << s) | (a >>> (32 - s))) + b;
+ 
++      }//hh
+ 
+-              function ii(a, b, c, d, x, s, t) {
+ 
+-                    a = a + (c ^ (b | ~d)) + x + t;
+-                    return ((a << s) | (a >>> (32 - s))) + b;
++      function ii(a, b, c, d, x, s, t) {
+ 
+-              }//ii
++            a = a + (c ^ (b | ~d)) + x + t;
++            return ((a << s) | (a >>> (32 - s))) + b;
+ 
+-        }//md5
++      }//ii
+ 
++}//md5
+ 
+ 
+ 

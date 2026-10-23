@@ -1,1 +1,0 @@
-// módulo de criptografia aqui

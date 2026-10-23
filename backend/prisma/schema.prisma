@@ -53,6 +53,7 @@ model Message {
   wrappedSessionKeyFrom String        @db.Text
   wrappedSessionKeyTo   String        @db.Text
   iv                    String
+  keyDerivationSalt     String
   ciphertext            String        @db.Text
   hmac                  String
   seq                   Int
